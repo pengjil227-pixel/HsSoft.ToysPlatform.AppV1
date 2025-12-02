@@ -1,0 +1,79 @@
+{
+  "id": "5077793",
+  "name": "wanhaoniu_color",
+  "font_family": "iconfont",
+  "css_prefix_text": "color-",
+  "description": "color icon",
+  "glyphs": [
+    {
+      "icon_id": "46231740",
+      "name": "工作台-selected",
+      "font_class": "gongzuotai-selected",
+      "unicode": "e645",
+      "unicode_decimal": 58949
+    },
+    {
+      "icon_id": "46231741",
+      "name": "择样车",
+      "font_class": "zeyangche",
+      "unicode": "e646",
+      "unicode_decimal": 58950
+    },
+    {
+      "icon_id": "46231742",
+      "name": "我的-selected",
+      "font_class": "wode-selected",
+      "unicode": "e644",
+      "unicode_decimal": 58948
+    },
+    {
+      "icon_id": "46231743",
+      "name": "择样车-selected",
+      "font_class": "zeyangche-selected",
+      "unicode": "e643",
+      "unicode_decimal": 58947
+    },
+    {
+      "icon_id": "46231734",
+      "name": "我的",
+      "font_class": "wode",
+      "unicode": "e64c",
+      "unicode_decimal": 58956
+    },
+    {
+      "icon_id": "46231735",
+      "name": "消息",
+      "font_class": "xiaoxi1",
+      "unicode": "e64a",
+      "unicode_decimal": 58954
+    },
+    {
+      "icon_id": "46231736",
+      "name": "首页",
+      "font_class": "shouye",
+      "unicode": "e64b",
+      "unicode_decimal": 58955
+    },
+    {
+      "icon_id": "46231737",
+      "name": "首页-selected",
+      "font_class": "shouye-selected",
+      "unicode": "e649",
+      "unicode_decimal": 58953
+    },
+    {
+      "icon_id": "46231738",
+      "name": "工作台",
+      "font_class": "gongzuotai1",
+      "unicode": "e647",
+      "unicode_decimal": 58951
+    },
+    {
+      "icon_id": "46231739",
+      "name": "消息-selected",
+      "font_class": "xiaoxi-selected",
+      "unicode": "e648",
+      "unicode_decimal": 58952
+    }
+  ]
+}
