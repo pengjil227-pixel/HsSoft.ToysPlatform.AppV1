@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../../pages/company/goods_detail.dart';
 import '../../pages/company/home_screen.dart';
 import '../../pages/company/setting.dart';
 //个人信息
@@ -19,18 +20,7 @@ class CompanyRoutes {
             path: 'setting',
             name: 'setting',
             builder: (context, state) => Setting(),
-            routes: [
-              GoRoute(
-                path: 'userInfo', // 路由路径
-                name: 'userInfo', // 路由名称（跳转时用）
-                builder: (context, state) => const UserInfoPage(),
-              ),
-              GoRoute(
-                path: 'aboutUs',
-                name: 'aboutUs',
-                builder: (context, state) => const AboutUsPage(),
-              ),
-            ],
+            routes: [],
           ),
         ],
       ),

@@ -47,7 +47,6 @@ dependencies:
   fluttertoast: ^9.0.0
   shared_preferences: ^2.5.3
   card_swiper: ^3.0.1
-  flutter_pickers: ^2.1.9
 
 dev_dependencies:
   flutter_test:
