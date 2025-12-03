@@ -1,11 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_wanhaoniu/src/widgets/primart_button.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconfont/iconfont.dart';
 
 import '../../core/constants/layout_constants.dart';
 import '../../widgets/custom_swiper.dart';
+import '../../widgets/goods_item.dart';
+import '../../widgets/prickers/string_picker.dart';
+import '../../widgets/primart_button.dart';
 
 class SupplyPage extends StatefulWidget {
   const SupplyPage({
@@ -57,7 +60,22 @@ class _SupplyPageState extends State<SupplyPage> {
               child: _SortingWidget(),
             ),
           ),
-        )
+        ),
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(LayoutConstants.pagePadding, 0, LayoutConstants.pagePadding, LayoutConstants.pagePadding),
+          sliver: SliverGrid.builder(
+            // itemCount: ,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: LayoutConstants.pagePadding,
+              mainAxisSpacing: LayoutConstants.pagePadding,
+              childAspectRatio: 0.9,
+            ),
+            itemBuilder: (context, index) {
+              return GoodsItem();
+            },
+          ),
+        ),
       ],
     );
   }
@@ -257,52 +275,54 @@ class __RightDialogState extends State<_RightDialog> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).requestFocus(FocusNode());
         },
-        child: SingleChildScrollView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-          physics: AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('关键词'),
-                SizedBox(height: 8),
-                _TextFormField(
-                  hintText: '请输入关键词',
-                ),
-                SizedBox(height: 20),
-                Text('关键词范围'),
-                _KeywordsWidget(
-                  titles: ['产品名称', '产品编号', '产品货号', '产品种类', '产品包装', '产品证书'],
-                ),
-                SizedBox(height: 8),
-                Text('关键词匹配'),
-                _KeywordsWidget(
-                  titles: ['模糊', '精准'],
-                ),
-                SizedBox(height: 8),
-                Text('多货号搜索'),
-                SizedBox(height: 8),
-                _TextFormField(
-                  hintText: '多货号查询以“，”隔开',
-                ),
-                SizedBox(height: 20),
-                Text('多展厅编号搜索'),
-                SizedBox(height: 8),
-                _TextFormField(
-                  hintText: '多展厅编号查询以“，”隔开',
-                ),
-                SizedBox(height: 20),
-                Text('多展厅编号搜索'),
-                SizedBox(height: 8),
-                _RegionPricker(),
-                SizedBox(height: 20),
-              ],
+        child: SizedBox.expand(
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('关键词'),
+                  SizedBox(height: 8),
+                  _TextFormField(
+                    hintText: '请输入关键词',
+                  ),
+                  SizedBox(height: 20),
+                  Text('关键词范围'),
+                  _KeywordsWidget(
+                    titles: ['产品名称', '产品编号', '产品货号', '产品种类', '产品包装', '产品证书'],
+                  ),
+                  SizedBox(height: 8),
+                  Text('关键词匹配'),
+                  _KeywordsWidget(
+                    titles: ['模糊', '精准'],
+                  ),
+                  SizedBox(height: 8),
+                  Text('多货号搜索'),
+                  SizedBox(height: 8),
+                  _TextFormField(
+                    hintText: '多货号查询以“，”隔开',
+                  ),
+                  SizedBox(height: 20),
+                  Text('多展厅编号搜索'),
+                  SizedBox(height: 8),
+                  _TextFormField(
+                    hintText: '多展厅编号查询以“，”隔开',
+                  ),
+                  SizedBox(height: 20),
+                  Text('多展厅编号搜索'),
+                  SizedBox(height: 8),
+                  _RegionPricker(),
+                  SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
@@ -319,6 +339,30 @@ class _RegionPricker extends StatefulWidget {
 }
 
 class __RegionPrickerState extends State<_RegionPricker> {
+  String? _province;
+  String? _city;
+
+  void _onProvinceConfirm(String value) {
+    setState(() {
+      _province = value;
+    });
+  }
+
+  void _onCityConfirm(String value) {
+    setState(() {
+      _city = value;
+    });
+  }
+
+  void _unFouns() {
+    FocusScope.of(context).requestFocus(FocusNode());
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -329,13 +373,22 @@ class __RegionPrickerState extends State<_RegionPricker> {
             child: PrimartButton(
               padding: EdgeInsets.symmetric(horizontal: 10),
               color: Color(0xFFF7F8FC),
-              onPressed: () {},
+              onPressed: () {
+                _unFouns();
+                Pickers.pickerProvince(
+                  context,
+                  onConfirm: _onProvinceConfirm,
+                );
+              },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '选择省',
-                    style: TextStyle(color: Color(0xFFCACFD2)),
+                  Expanded(
+                    child: Text(
+                      _province ?? '选择省',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: _province == null ? Color(0xFFCACFD2) : null),
+                    ),
                   ),
                   Icon(
                     Icons.keyboard_arrow_down_outlined,
@@ -353,13 +406,22 @@ class __RegionPrickerState extends State<_RegionPricker> {
             child: PrimartButton(
               padding: EdgeInsets.symmetric(horizontal: 10),
               color: Color(0xFFF7F8FC),
-              onPressed: () {},
+              onPressed: () {
+                _unFouns();
+                Pickers.pickerProvince(
+                  context,
+                  onConfirm: _onCityConfirm,
+                );
+              },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '选择市',
-                    style: TextStyle(color: Color(0xFFCACFD2)),
+                  Expanded(
+                    child: Text(
+                      _city ?? '选择市',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: _city == null ? Color(0xFFCACFD2) : null),
+                    ),
                   ),
                   Icon(
                     Icons.keyboard_arrow_down_outlined,
