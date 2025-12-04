@@ -27,6 +27,14 @@ void main() async {
   final loginUser = await loadLoginUserInfo();
   if (loginUser != null) {
     loginUserInfo = LoginUserInfo.fromJson(jsonDecode(loginUser));
+    //每次请求带上token
+    HttpManager().setAuthToken(loginUserInfo.accessToken);
+
+    print("=========================================");
+    print("🔑 我的 Token: ${loginUserInfo.accessToken}");
+    print("=========================================");
+
+
   }
 
   runApp(MultiProvider(

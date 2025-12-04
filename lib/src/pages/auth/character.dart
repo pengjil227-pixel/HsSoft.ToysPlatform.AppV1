@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/network/http_manager.dart';
 import '../../core/network/modules/auth.dart';
 import '../../core/providers/login_user.dart';
 import '../../shared/models/login_user_info.dart';
@@ -47,6 +48,10 @@ class _CharacterState extends State<Character> {
 
     if (response.success) {
       await saveLoginUserInfo(jsonEncode(response.data!.toJson()));
+
+      //登录成功立马设置token
+      HttpManager().setAuthToken(response.data!.accessToken);
+
       if (!context.mounted) return;
       context.read<LoginUser>().loginUser = response.data;
       context.go(AppConstants.isFactoryUser(LoginInfoSingleton.loginUserInfo) ? '/factoryHome' : '/');
