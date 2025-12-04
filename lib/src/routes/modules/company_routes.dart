@@ -7,7 +7,7 @@ import '../../pages/company/setting.dart';
 import '../../pages/company/setting_pages/user_info_page.dart';
 //关于我们
 import '../../pages/company/setting_pages/about_us_page.dart';
-
+import '../../pages/company/category_page.dart';
 class CompanyRoutes {
   static List<GoRoute> get routes {
     return [
@@ -20,7 +20,23 @@ class CompanyRoutes {
             path: 'setting',
             name: 'setting',
             builder: (context, state) => Setting(),
-            routes: [],
+            routes:[
+              GoRoute(
+                path: 'userInfo',
+                name: 'userInfo',
+                builder: (context, state) => const UserInfoPage(),
+              ),
+              GoRoute(
+                path: 'aboutUs',
+                name: 'aboutUs',
+                builder: (context, state) => const AboutUsPage(),
+              ),
+              GoRoute(
+                path: 'category',
+                name: 'category',
+                builder: (context, state) => const CategoryPage(),
+              ),
+            ],
           ),
         ],
       ),

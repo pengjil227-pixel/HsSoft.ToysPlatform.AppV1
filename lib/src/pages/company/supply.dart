@@ -9,7 +9,7 @@ import '../../widgets/custom_swiper.dart';
 import '../../widgets/goods_item.dart';
 import '../../widgets/prickers/string_picker.dart';
 import '../../widgets/primart_button.dart';
-
+import 'package:go_router/go_router.dart';
 class SupplyPage extends StatefulWidget {
   const SupplyPage({
     super.key,
@@ -244,19 +244,27 @@ class __SortingWidgetState extends State<_SortingWidget> {
             ),
           ),
         ),
-        Padding(
-          padding: EdgeInsets.all(8),
-          child: Row(
-            children: [
-              Text('品类'),
-              Padding(
-                padding: EdgeInsets.only(left: 2),
-                child: Icon(
-                  Iconfont.xiala2,
-                  size: 4,
+        // 找到原来的 "品类" 代码块，替换为：
+        GestureDetector(
+          onTap: () {
+            // 跳转到分类页面
+            context.pushNamed('category');
+          },
+          behavior: HitTestBehavior.opaque, // 确保点击区域覆盖整个文字块
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Row(
+              children: [
+                Text('品类'),
+                Padding(
+                  padding: EdgeInsets.only(left: 2),
+                  child: Icon(
+                    Iconfont.xiala2,
+                    size: 4,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

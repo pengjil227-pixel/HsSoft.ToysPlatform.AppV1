@@ -74,10 +74,10 @@ class _SettingState extends State<Setting> {
                               },
                               child: ListTile(
                                 title: Text(item.text),
-                                // 加一个小箭头，看起来更像可以点击
+
                                 trailing: const Icon(
                                   Iconfont.a_jiantouyou, // 使用你自己的图标
-                                  size: 14, // 自定义图标可能会偏大，建议稍微调小一点，你可以自己试
+                                  size: 14,
                                   color: Color(0xFFCCCCCC),
                                 ),
                               ),
