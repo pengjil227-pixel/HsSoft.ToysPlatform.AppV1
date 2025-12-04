@@ -14,16 +14,33 @@ class _CategoryPageState extends State<CategoryPage> {
 
   int _selectedIndex = 0;
   bool _isClickScrolling = false;
-  final List<CategoryModel> _allData = [];
 
-  // 定义颜色常量
-  final Color _unselectedColor = const Color(0xFFEEEEEE); // 左边未选中（较深灰）
-  final Color _backgroundColor = const Color(0xFFF4F4F4); // 右侧背景 & 左边选中（较浅灰）
+  // --- 核心变化 1：扁平化数据源 ---
+  // 不再存 CategoryModel，而是存每一“行”的数据
+  final List<dynamic> _flatItems = [];
+
+  // --- 核心变化 2：索引映射表 ---
+  // 记录每个分类的标题在 _flatItems 里的位置（index）
+  // 比如：索引 0 的“遥控玩具”在 _flatItems 的第 0 个
+  // 索引 1 的“电动玩具”在 _flatItems 的第 5 个（假设遥控玩具有4行商品）
+  final List<int> _categoryHeaderIndices = [];
+
+  // 左侧菜单数据
+  final List<String> _categories = [
+    "遥控玩具", "电动玩具", "变形类", "线控玩具", "拉线类",
+    "滑行类", "力控玩具", "回力系列", "惯性玩具", "军警",
+    "海盗类", "战具系列", "枪系列", "弹射类", "体育用品",
+    "夏日玩具", "礼品精品"
+  ];
+
+  // 颜色常量
+  final Color _unselectedColor = const Color(0xFFEEEEEE);
+  final Color _backgroundColor = const Color(0xFFF4F4F4);
 
   @override
   void initState() {
     super.initState();
-    _initMockData();
+    _initFlattenData();
     _itemPositionsListener.itemPositions.addListener(_onRightScroll);
   }
 
@@ -33,42 +50,66 @@ class _CategoryPageState extends State<CategoryPage> {
     super.dispose();
   }
 
-  void _initMockData() {
-    final List<String> categories = [
-      "遥控玩具", "电动玩具", "变形类", "线控玩具", "拉线类",
-      "滑行类", "力控玩具", "回力系列", "惯性玩具", "军警",
-      "海盗类", "战具系列", "枪系列", "弹射类", "体育用品",
-      "夏日玩具", "礼品精品"
-    ];
+  // --- 初始化并“拍平”数据 ---
+  void _initFlattenData() {
+    _flatItems.clear();
+    _categoryHeaderIndices.clear();
 
-    for (var i = 0; i < categories.length; i++) {
-      _allData.add(CategoryModel(
-        title: categories[i],
-        products: List.generate(RandomData.randomInt(6, 15), (j) {
-          return ProductModel(
-            name: "${categories[i]}-$j",
-            image: "https://picsum.photos/200/200?random=$i$j",
-          );
-        }),
-      ));
+    for (int i = 0; i < _categories.length; i++) {
+      // 1. 记录当前分类标题在扁平列表中的位置
+      _categoryHeaderIndices.add(_flatItems.length);
+
+      // 2. 添加标题行
+      _flatItems.add(HeaderItem(title: _categories[i], categoryIndex: i));
+
+      // 3. 生成模拟商品数据
+      List<ProductModel> products = List.generate(RandomData.randomInt(6, 15), (j) {
+        return ProductModel(
+          name: "${_categories[i]}-$j",
+          image: "https://picsum.photos/200/200?random=$i$j",
+        );
+      });
+
+      // 4. 将商品拆分成“行”，每行3个，放入列表
+      // 这样就不需要 GridView 了，直接用 Row 渲染，性能极高
+      for (int j = 0; j < products.length; j += 3) {
+        int end = (j + 3 < products.length) ? j + 3 : products.length;
+        _flatItems.add(ProductRowItem(
+          products: products.sublist(j, end),
+          categoryIndex: i, // 记录这一行属于哪个分类，用于反向高亮左侧
+        ));
+      }
     }
   }
 
   void _onRightScroll() {
     if (_isClickScrolling) return;
+
     final positions = _itemPositionsListener.itemPositions.value;
     if (positions.isEmpty) return;
 
+    // 找到当前屏幕最上面那个 Item
     int minIndex = positions
         .where((ItemPosition position) => position.itemTrailingEdge > 0)
         .reduce((ItemPosition min, ItemPosition position) =>
     position.itemTrailingEdge < min.itemTrailingEdge ? position : min)
         .index;
 
-    if (minIndex != _selectedIndex) {
-      setState(() {
-        _selectedIndex = minIndex;
-      });
+    // 获取这个 Item 属于哪个分类索引
+    if (minIndex < _flatItems.length) {
+      var item = _flatItems[minIndex];
+      int currentCategoryIndex = 0;
+      if (item is HeaderItem) {
+        currentCategoryIndex = item.categoryIndex;
+      } else if (item is ProductRowItem) {
+        currentCategoryIndex = item.categoryIndex;
+      }
+
+      if (currentCategoryIndex != _selectedIndex) {
+        setState(() {
+          _selectedIndex = currentCategoryIndex;
+        });
+      }
     }
   }
 
@@ -78,8 +119,11 @@ class _CategoryPageState extends State<CategoryPage> {
       _isClickScrolling = true;
     });
 
+    // 核心变化 3：跳转时，去查找该分类标题在扁平列表里的真实索引
+    int targetIndex = _categoryHeaderIndices[index];
+
     await _itemScrollController.scrollTo(
-      index: index,
+      index: targetIndex,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
@@ -111,13 +155,13 @@ class _CategoryPageState extends State<CategoryPage> {
       body: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // --- 左侧菜单栏 ---
+          // --- 左侧菜单栏 (逻辑不变) ---
           Container(
             width: 94,
-            color: _unselectedColor, // 默认背景色 #EEEEEE
+            color: _unselectedColor,
             child: ListView.builder(
               physics: const BouncingScrollPhysics(),
-              itemCount: _allData.length,
+              itemCount: _categories.length,
               itemBuilder: (context, index) {
                 bool isSelected = _selectedIndex == index;
                 return GestureDetector(
@@ -125,33 +169,28 @@ class _CategoryPageState extends State<CategoryPage> {
                   behavior: HitTestBehavior.opaque,
                   child: Container(
                     height: 52,
-                    // 选中变 #F4F4F4，未选中 #EEEEEE
                     color: isSelected ? _backgroundColor : _unselectedColor,
                     child: Stack(
                       children: [
-                        // 文字
                         Center(
                           child: Text(
-                            _allData[index].title,
+                            _categories[index],
                             style: TextStyle(
                               fontSize: 14,
-                              // 选中变主题红，未选中黑色
                               color: isSelected ? primaryColor : const Color(0xFF333333),
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                             ),
                           ),
                         ),
-
-                        // ✅ 修改处：选中指示器 (底部居中红条)
                         if (isSelected)
                           Positioned(
-                            bottom: 0, // 放在底部
+                            bottom: 0,
                             left: 0,
                             right: 0,
-                            child: Center( // 居中
+                            child: Center(
                               child: Container(
-                                width: 20, // 红条宽度，可以自己微调
-                                height: 3, // 红条高度
+                                width: 20,
+                                height: 3,
                                 decoration: BoxDecoration(
                                   color: primaryColor,
                                   borderRadius: const BorderRadius.only(
@@ -170,84 +209,88 @@ class _CategoryPageState extends State<CategoryPage> {
             ),
           ),
 
-          // --- 右侧内容区 ---
+          // --- 右侧内容区 (完全重构) ---
           Expanded(
             child: Container(
-              color: _backgroundColor, // 右侧背景色 #F4F4F4
+              color: _backgroundColor,
               child: ScrollablePositionedList.builder(
-                itemCount: _allData.length,
+                itemCount: _flatItems.length, // 现在的 item 总数变多了
                 itemScrollController: _itemScrollController,
                 itemPositionsListener: _itemPositionsListener,
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 itemBuilder: (context, index) {
-                  final category = _allData[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          category.title,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF333333),
-                          ),
+                  final item = _flatItems[index];
+
+                  // --- 渲染标题 ---
+                  if (item is HeaderItem) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 12, bottom: 8, left: 4),
+                      child: Text(
+                        item.title,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF333333),
                         ),
-                        const SizedBox(height: 12),
-                        GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            mainAxisSpacing: 16,
-                            crossAxisSpacing: 10,
-                            childAspectRatio: 0.7,
-                          ),
-                          itemCount: category.products.length,
-                          itemBuilder: (context, i) {
-                            final product = category.products[i];
-                            return Column(
-                              children: [
-                                Container(
-                                  width: 70,
-                                  height: 70,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(4),
-                                    color: Colors.grey[200],
+                      ),
+                    );
+                  }
+
+                  // --- 渲染商品行 (一行3个) ---
+                  else if (item is ProductRowItem) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 10), // 行间距
+                      child: Row(
+                        children: item.products.map((product) {
+                          return Expanded(
+                            child: Container(
+                              // 给每个商品卡片加点间距
+                              margin: const EdgeInsets.symmetric(horizontal: 5),
+                              child: Column(
+                                children: [
+                                  // 图片
+                                  Container(
+                                    width: 70, // 这里的宽受 Expanded 约束，主要靠 height 撑
+                                    height: 70,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white, // 图片底色白
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    clipBehavior: Clip.hardEdge,
+                                    child: Image.network(
+                                      product.image,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (ctx, err, stack) =>
+                                          Image.asset('assets/images/logo.png'),
+                                    ),
                                   ),
-                                  clipBehavior: Clip.hardEdge,
-                                  child: Image.network(
-                                    product.image,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (ctx, err, stack) =>
-                                        Image.asset('assets/images/logo.png'),
+                                  const SizedBox(height: 6),
+                                  // 名字
+                                  Text(
+                                    product.name,
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF666666),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  product.name,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFF666666),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  );
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList()
+                        // 如果这一行不足3个，需要补透明占位符保持布局对齐
+                          ..addAll(List.generate(
+                            3 - item.products.length,
+                                (index) => const Expanded(child: SizedBox()),
+                          )),
+                      ),
+                    );
+                  }
+                  return const SizedBox();
                 },
               ),
             ),
@@ -258,10 +301,20 @@ class _CategoryPageState extends State<CategoryPage> {
   }
 }
 
-class CategoryModel {
+// --- 数据类 ---
+
+// 1. 标题行数据结构
+class HeaderItem {
   final String title;
+  final int categoryIndex;
+  HeaderItem({required this.title, required this.categoryIndex});
+}
+
+// 2. 商品行数据结构 (每行3个)
+class ProductRowItem {
   final List<ProductModel> products;
-  CategoryModel({required this.title, required this.products});
+  final int categoryIndex;
+  ProductRowItem({required this.products, required this.categoryIndex});
 }
 
 class ProductModel {
