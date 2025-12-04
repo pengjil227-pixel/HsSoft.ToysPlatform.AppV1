@@ -9,7 +9,7 @@ class ProductService {
     return HttpManager().post(
       '${HttpConfig.businessBaseUrl}/front/FrontProductClass/GetProductClassList',
       data: {
-        "level": 0, // 0-所有 (根据你的接口文档)
+        "level": 0,
         "keywords": ""
       },
       fromJsonT: (data) {
