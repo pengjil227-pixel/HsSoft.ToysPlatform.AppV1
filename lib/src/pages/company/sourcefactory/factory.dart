@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/layout_constants.dart';
-import '../../widgets/custom_swiper.dart';
+import 'package:go_router/go_router.dart'; // 引入路由
+import '../../../core/constants/layout_constants.dart';
+import '../../../widgets/custom_swiper.dart';
 import 'package:iconfont/iconfont.dart';
 
 class FactoryPage extends StatefulWidget {
@@ -14,7 +15,7 @@ class _FactoryPageState extends State<FactoryPage> {
   final PageController _newArrivalsController = PageController();
   int _newArrivalsIndex = 0;
 
-  // ✅ 新增：模拟数据总量 (懒加载 n 条)
+  // 模拟数据总量
   final int _dataCount = 20;
 
   @override
@@ -36,8 +37,7 @@ class _FactoryPageState extends State<FactoryPage> {
                   left: LayoutConstants.pagePadding,
                   right: LayoutConstants.pagePadding,
                   top: 10,
-                  bottom: 10
-              ),
+                  bottom: 10),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
@@ -72,7 +72,7 @@ class _FactoryPageState extends State<FactoryPage> {
             child: _buildRecommendedFactory(),
           ),
 
-          // --- 3. 新增：全部厂商标题栏 (橙色渐变 Bar) ---
+          // --- 3. 全部厂商标题栏 (橙色渐变 Bar) ---
           SliverToBoxAdapter(
             child: _buildAllFactoriesHeader(),
           ),
@@ -81,14 +81,11 @@ class _FactoryPageState extends State<FactoryPage> {
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: LayoutConstants.pagePadding),
             sliver: SliverList(
-              // SliverChildBuilderDelegate 自带懒加载机制
-              // 只有滚动到可视区域时才会构建 Item
               delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                  // 这里复用组件，实际开发中可以传参 dataList[index]
                   return const FactoryProductCard();
                 },
-                childCount: _dataCount, // ✅ 修改：使用变量控制条数
+                childCount: _dataCount,
               ),
             ),
           ),
@@ -101,20 +98,13 @@ class _FactoryPageState extends State<FactoryPage> {
 
   // ================= 模块构建方法 =================
 
-
   Widget _buildAllFactoriesHeader() {
     return Container(
-      height: 44, // 标题栏高度
-
+      height: 44,
       margin: const EdgeInsets.fromLTRB(
-          LayoutConstants.pagePadding,
-          10,
-          LayoutConstants.pagePadding,
-          0
-      ),
+          LayoutConstants.pagePadding, 10, LayoutConstants.pagePadding, 0),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: const BoxDecoration(
-
         gradient: LinearGradient(
           colors: [
             Color(0xFFFF9000),
@@ -123,7 +113,6 @@ class _FactoryPageState extends State<FactoryPage> {
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
-
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(8),
           topRight: Radius.circular(8),
@@ -153,8 +142,7 @@ class _FactoryPageState extends State<FactoryPage> {
       margin: const EdgeInsets.only(
           left: LayoutConstants.pagePadding,
           right: LayoutConstants.pagePadding,
-          bottom: 10
-      ),
+          bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -167,7 +155,8 @@ class _FactoryPageState extends State<FactoryPage> {
               children: [
                 Icon(Iconfont.xinpin, size: 18, color: theme.primaryColor),
                 const SizedBox(width: 6),
-                const Text('最新入驻', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const Text('最新入驻',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 const Spacer(),
                 const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
               ],
@@ -222,15 +211,14 @@ class _FactoryPageState extends State<FactoryPage> {
     );
   }
 
-  // --- 模块 2: 推荐厂商  ---
+  // --- 模块 2: 推荐厂商 ---
   Widget _buildRecommendedFactory() {
     final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(
           left: LayoutConstants.pagePadding,
           right: LayoutConstants.pagePadding,
-          bottom: 10
-      ),
+          bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -243,13 +231,13 @@ class _FactoryPageState extends State<FactoryPage> {
               children: [
                 Icon(Iconfont.tuijian, size: 18, color: theme.primaryColor),
                 const SizedBox(width: 6),
-                const Text('推荐厂商', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const Text('推荐厂商',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 const Spacer(),
                 const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
               ],
             ),
           ),
-
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -265,51 +253,22 @@ class _FactoryPageState extends State<FactoryPage> {
     );
   }
 
-
+  // --- 点击跳转逻辑：最新入驻小图标 ---
   Widget _buildFactoryItem() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFFEEEEEE)),
-          ),
-          clipBehavior: Clip.hardEdge,
-          child: Image.asset(
-            'assets/images/logo.png',
-            fit: BoxFit.contain,
-          ),
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          '宏升玩具',
-          style: TextStyle(fontSize: 12, color: Color(0xFF333333)),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
-
-
-  Widget _buildRecommendedItem() {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF9F9F9),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
+    return GestureDetector(
+      onTap: () {
+        context.pushNamed('factoryDetail');
+      },
+      behavior: HitTestBehavior.opaque, // 扩大点击区域
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 50,
+            height: 50,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFEEEEEE)),
             ),
             clipBehavior: Clip.hardEdge,
             child: Image.asset(
@@ -317,33 +276,72 @@ class _FactoryPageState extends State<FactoryPage> {
               fit: BoxFit.contain,
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Text(
-                  '厂商名称',
-                  style: TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF333333),
-                      fontWeight: FontWeight.w500
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 2),
-                Text(
-                  '主营：电动玩具...',
-                  style: TextStyle(fontSize: 11, color: Color(0xFF999999)),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+          const SizedBox(height: 6),
+          const Text(
+            '宏升玩具',
+            style: TextStyle(fontSize: 12, color: Color(0xFF333333)),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
+      ),
+    );
+  }
+
+  // --- 点击跳转逻辑：推荐厂商卡片 ---
+  Widget _buildRecommendedItem() {
+    return GestureDetector(
+      onTap: () {
+        context.pushNamed('factoryDetail');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF9F9F9),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              clipBehavior: Clip.hardEdge,
+              child: Image.asset(
+                'assets/images/logo.png',
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    '厂商名称',
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF333333),
+                        fontWeight: FontWeight.w500),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    '主营：电动玩具...',
+                    style: TextStyle(fontSize: 11, color: Color(0xFF999999)),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -355,81 +353,86 @@ class FactoryProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    return Container(
-      height: 213,
-      padding: const EdgeInsets.all(10),
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          // --- 1. 头部 ---
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(4),
+    // --- 点击跳转逻辑：全部厂商列表卡片 ---
+    return GestureDetector(
+      onTap: () {
+        context.pushNamed('factoryDetail');
+      },
+      child: Container(
+        height: 213,
+        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          children: [
+            // --- 1. 头部 ---
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
-                clipBehavior: Clip.hardEdge,
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  fit: BoxFit.contain,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      '厂商名称',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Color(0xFF333333),
-                        fontWeight: FontWeight.bold,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text(
+                        '厂商名称',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Color(0xFF333333),
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      '主营：电动玩具、益智玩具...',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF999999)),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                      SizedBox(height: 4),
+                      Text(
+                        '主营：电动玩具、益智玩具...',
+                        style: TextStyle(fontSize: 12, color: Color(0xFF999999)),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          const Spacer(),
+            const Spacer(),
 
-          // --- 2. 下半部分：3个产品横向排列 ---
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 第一个商品
-              Expanded(child: _buildProductItem()),
+            // --- 2. 下半部分：3个产品横向排列 ---
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 第一个商品
+                Expanded(child: _buildProductItem()),
 
-              // 中间间距 (固定宽度)
-              const SizedBox(width: 10),
+                // 中间间距 (固定宽度)
+                const SizedBox(width: 10),
 
-              // 第二个商品
-              Expanded(child: _buildProductItem()),
-              const SizedBox(width: 10),
-              Expanded(child: _buildProductItem()),
-            ],
-          ),
-        ],
+                // 第二个商品
+                Expanded(child: _buildProductItem()),
+                const SizedBox(width: 10),
+                Expanded(child: _buildProductItem()),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

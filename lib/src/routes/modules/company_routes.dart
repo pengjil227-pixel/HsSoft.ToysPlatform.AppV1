@@ -8,6 +8,7 @@ import '../../pages/company/setting_pages/user_info_page.dart';
 //关于我们
 import '../../pages/company/setting_pages/about_us_page.dart';
 import '../../pages/company/category_page.dart';
+import '../../pages/company/sourcefactory/factory_detail.dart';
 class CompanyRoutes {
   static List<GoRoute> get routes {
     return [
@@ -35,6 +36,12 @@ class CompanyRoutes {
                 path: 'category',
                 name: 'category',
                 builder: (context, state) => const CategoryPage(),
+              ),
+
+              GoRoute(
+                path: 'factoryDetail',
+                name: 'factoryDetail',
+                builder: (context, state) => const FactoryDetailPage(),
               ),
             ],
           ),
