@@ -5,9 +5,7 @@ import '../../shared/models/login_user_info.dart';
 class LoginUser extends ChangeNotifier {
   LoginUser({
     LoginUserInfo? initialLoginUserInfo,
-  }) {
-    loginUser = initialLoginUserInfo;
-  }
+  });
 
   LoginUserInfo? get loginUser => LoginInfoSingleton.loginUserInfo;
 

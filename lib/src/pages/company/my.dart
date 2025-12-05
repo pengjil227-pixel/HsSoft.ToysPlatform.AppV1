@@ -19,6 +19,16 @@ class _MyPageState extends State<MyPage> {
   final ScrollController _scrollController = ScrollController();
 
   @override
+  void initState() {
+    super.initState();
+
+    _init();
+  }
+  _init() async{
+    await Future.delayed(Duration.zero);
+    print(LoginInfoSingleton.loginUserInfo) ;
+  }
+  @override
   void dispose() {
     super.dispose();
     _scrollController.dispose();

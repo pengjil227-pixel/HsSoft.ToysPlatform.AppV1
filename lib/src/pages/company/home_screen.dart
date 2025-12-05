@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:iconfont/iconfont.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/providers/home_infos.dart';
 import '../../widgets/keep_alive_page.dart';
 import '../../widgets/page_screen.dart';
 import 'message/message_page.dart';
@@ -11,6 +13,10 @@ class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
   static final List<Widget> _pages = [
+    KeepAlivePage(
+      child: ChangeNotifierProvider(create: (_) => HomeInfos(), child: HomePage()),
+    ),
+    KeepAlivePage(child: CartPage()),
     KeepAlivePage(child: HomePage()),
     KeepAlivePage(child: MessagePage()),
     KeepAlivePage(child: MyPage()),
