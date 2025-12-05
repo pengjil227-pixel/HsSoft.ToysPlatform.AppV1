@@ -128,47 +128,57 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
         aspectRatio: 360 / 86,
         child: Row(
           children: [
-            // 头像
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/logo.png'),
-                  fit: BoxFit.cover,
-                ),
-                border: Border.all(color: const Color(0xFFF0F0F0), width: 0.5),
-              ),
-            ),
-            const SizedBox(width: 10),
-            // 中间信息
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Text(
-                    '****厂商',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF333333),
+              child: GestureDetector(
+                onTap: () => context.pushNamed('factoryName'),
+                behavior: HitTestBehavior.opaque,
+                child: Row(
+                  children: [
+                    // 头像
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        image: const DecorationImage(
+                          image: AssetImage('assets/images/logo.png'),
+                          fit: BoxFit.cover,
+                        ),
+                        border: Border.all(color: const Color(0xFFF0F0F0), width: 0.5),
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    '产品: 88   关注: 88',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF999999),
+                    const SizedBox(width: 10),
+                    // 中间信息
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text(
+                            '****厂商',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF333333),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            '产品: 88   关注: 88',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF999999),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             // 右侧按钮

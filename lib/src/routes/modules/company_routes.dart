@@ -9,6 +9,9 @@ import '../../pages/company/setting_pages/user_info_page.dart';
 import '../../pages/company/setting_pages/about_us_page.dart';
 import '../../pages/company/category_page.dart';
 import '../../pages/company/sourcefactory/factory_detail.dart';
+import '../../pages/company/sourcefactory/factory_name_page.dart';
+import '../../pages/company/sourcefactory/factory_list_page.dart';
+
 class CompanyRoutes {
   static List<GoRoute> get routes {
     return [
@@ -42,6 +45,16 @@ class CompanyRoutes {
                 path: 'factoryDetail',
                 name: 'factoryDetail',
                 builder: (context, state) => const FactoryDetailPage(),
+              ),
+              GoRoute(
+                path: 'factoryName',
+                name: 'factoryName',
+                builder: (context, state) => const FactoryNamePage(),
+              ),
+              GoRoute(
+                path: 'factoryList',
+                name: 'factoryList',
+                builder: (context, state) => const FactoryListPage(),
               ),
             ],
           ),

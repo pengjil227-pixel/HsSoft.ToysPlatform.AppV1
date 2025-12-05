@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // 引入路由
 import '../../../core/constants/layout_constants.dart';
-import '../../../widgets/custom_swiper.dart';
 import 'package:iconfont/iconfont.dart';
+import '../../../widgets/custom_swiper.dart';
+import 'factory_product_card.dart';
 
 class FactoryPage extends StatefulWidget {
   const FactoryPage({super.key});
@@ -17,6 +18,14 @@ class _FactoryPageState extends State<FactoryPage> {
 
   // 模拟数据总量
   final int _dataCount = 20;
+
+  void _goToFactoryListPage() {
+    context.pushNamed('factoryList');
+  }
+
+  void _goToFactoryNamePage() {
+    context.pushNamed('factoryName');
+  }
 
   @override
   void dispose() {
@@ -119,8 +128,8 @@ class _FactoryPageState extends State<FactoryPage> {
         ),
       ),
       child: Row(
-        children: const [
-          Text(
+        children: [
+          const Text(
             '全部厂商',
             style: TextStyle(
               color: Colors.white,
@@ -128,8 +137,15 @@ class _FactoryPageState extends State<FactoryPage> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          Spacer(),
-          Icon(Icons.chevron_right, color: Colors.white, size: 20),
+          const Spacer(),
+          GestureDetector(
+            onTap: _goToFactoryListPage,
+            behavior: HitTestBehavior.opaque,
+            child: const Padding(
+              padding: EdgeInsets.all(4),
+              child: Icon(Icons.chevron_right, color: Colors.white, size: 20),
+            ),
+          ),
         ],
       ),
     );
@@ -158,7 +174,14 @@ class _FactoryPageState extends State<FactoryPage> {
                 const Text('最新入驻',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 const Spacer(),
-                const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                GestureDetector(
+                  onTap: _goToFactoryListPage,
+                  behavior: HitTestBehavior.opaque,
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                  ),
+                ),
               ],
             ),
           ),
@@ -234,7 +257,14 @@ class _FactoryPageState extends State<FactoryPage> {
                 const Text('推荐厂商',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 const Spacer(),
-                const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                GestureDetector(
+                  onTap: _goToFactoryListPage,
+                  behavior: HitTestBehavior.opaque,
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                  ),
+                ),
               ],
             ),
           ),
@@ -343,133 +373,6 @@ class _FactoryPageState extends State<FactoryPage> {
           ],
         ),
       ),
-    );
-  }
-}
-
-// ================= 底部复用的大组件 =================
-class FactoryProductCard extends StatelessWidget {
-  const FactoryProductCard({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    // --- 点击跳转逻辑：全部厂商列表卡片 ---
-    return GestureDetector(
-      onTap: () {
-        context.pushNamed('factoryDetail');
-      },
-      child: Container(
-        height: 213,
-        padding: const EdgeInsets.all(10),
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          children: [
-            // --- 1. 头部 ---
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  clipBehavior: Clip.hardEdge,
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text(
-                        '厂商名称',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Color(0xFF333333),
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        '主营：电动玩具、益智玩具...',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF999999)),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            const Spacer(),
-
-            // --- 2. 下半部分：3个产品横向排列 ---
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 第一个商品
-                Expanded(child: _buildProductItem()),
-
-                // 中间间距 (固定宽度)
-                const SizedBox(width: 10),
-
-                // 第二个商品
-                Expanded(child: _buildProductItem()),
-                const SizedBox(width: 10),
-                Expanded(child: _buildProductItem()),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 单个产品子项
-  Widget _buildProductItem() {
-    return Column(
-      children: [
-        // 图片
-        AspectRatio(
-          aspectRatio: 1,
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            clipBehavior: Clip.hardEdge,
-            child: Image.network(
-              'https://picsum.photos/109/109',
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-              const Center(child: Icon(Icons.image, color: Colors.grey)),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        // 下方文字
-        const Text(
-          '拉布布溜溜球',
-          style: TextStyle(
-            fontSize: 13,
-            color: Color(0xFF333333),
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
     );
   }
 }
