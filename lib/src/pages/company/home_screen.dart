@@ -3,7 +3,7 @@ import 'package:iconfont/iconfont.dart';
 
 import '../../widgets/keep_alive_page.dart';
 import '../../widgets/page_screen.dart';
-import 'cart.dart';
+import 'message/message_page.dart';
 import 'home.dart';
 import 'my.dart';
 
@@ -12,7 +12,7 @@ class HomeScreen extends StatelessWidget {
 
   static final List<Widget> _pages = [
     KeepAlivePage(child: HomePage()),
-    KeepAlivePage(child: CartPage()),
+    KeepAlivePage(child: MessagePage()),
     KeepAlivePage(child: MyPage()),
   ];
 
