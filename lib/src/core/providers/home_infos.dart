@@ -50,7 +50,7 @@ class HomeInfos extends ChangeNotifier {
     try {
       _updateSalesAdsList();
       _updateOnlineExhibitionList();
-      _getNewProduct();
+      // _getNewProduct();
     } catch (err) {
       print(err);
     }

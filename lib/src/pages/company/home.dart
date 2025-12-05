@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/layout_constants.dart';
 import '../../core/providers/home_infos.dart';
 import '../../widgets/keep_alive_page.dart';
-import 'factory.dart';
+import 'sourcefactory/factory.dart';
 import 'recommended.dart';
 import 'supply.dart';
 
