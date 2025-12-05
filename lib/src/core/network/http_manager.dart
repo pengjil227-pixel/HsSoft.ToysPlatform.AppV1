@@ -1,14 +1,19 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 
+import '../providers/login_user.dart';
 import 'api_exception.dart';
 import 'api_response.dart';
 import 'http_config.dart';
 
 class HttpManager {
-  static final HttpManager _instance = HttpManager._internal();
+  static final HttpManager _instance = HttpManager._internal(baseUrl: '');
   factory HttpManager() => _instance;
-  HttpManager._internal();
+  HttpManager._internal({
+    required String baseUrl,
+  }) {
+    _init();
+  }
 
   late Dio _dio;
 
@@ -17,7 +22,7 @@ class HttpManager {
   static const interceptorResponse = 2;
   static const interceptorError = 3;
 
-  void init({
+  void _init({
     String? baseUrl,
     int? connectTimeout,
     int? receiveTimeout,
@@ -43,6 +48,25 @@ class HttpManager {
     //   responseBody: true,
     // ));
 
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (RequestOptions options, handler) {
+        final loginUserInfo = LoginInfoSingleton.loginUserInfo;
+        if (loginUserInfo != null) {
+          options.headers['Authorization'] = loginUserInfo.accessToken;
+        }
+
+        return handler.next(options);
+      },
+      onResponse: (response, handler) {
+        // 响应处理
+        return handler.next(response);
+      },
+      onError: (DioException e, handler) {
+        // 错误处理
+        return handler.next(e);
+      },
+    ));
+
     // 添加自定义拦截器
     if (interceptors != null) {
       _dio.interceptors.addAll(interceptors);
@@ -61,10 +85,14 @@ class HttpManager {
   Future<ApiResponse<T>> get<T>(
     String path, {
     Map<String, dynamic>? queryParameters,
+    String? baseUrl,
     Options? options,
     T Function(dynamic)? fromJsonT,
     bool showLoading = false,
   }) async {
+    if (baseUrl != null) {
+      _dio.options.baseUrl = baseUrl;
+    }
     try {
       final response = await _dio.get(
         path,
@@ -81,11 +109,15 @@ class HttpManager {
   Future<ApiResponse<T>> post<T>(
     String path, {
     dynamic data,
+    String? baseUrl,
     Map<String, dynamic>? queryParameters,
     Options? options,
     T Function(dynamic)? fromJsonT,
     bool showLoading = false,
   }) async {
+    if (baseUrl != null) {
+      _dio.options.baseUrl = baseUrl;
+    }
     try {
       final response = await _dio.post(
         path,
@@ -103,10 +135,14 @@ class HttpManager {
   Future<ApiResponse<T>> put<T>(
     String path, {
     dynamic data,
+    String? baseUrl,
     Map<String, dynamic>? queryParameters,
     Options? options,
     T Function(dynamic)? fromJsonT,
   }) async {
+    if (baseUrl != null) {
+      _dio.options.baseUrl = baseUrl;
+    }
     try {
       final response = await _dio.put(
         path,
@@ -124,10 +160,14 @@ class HttpManager {
   Future<ApiResponse<T>> delete<T>(
     String path, {
     dynamic data,
+    String? baseUrl,
     Map<String, dynamic>? queryParameters,
     Options? options,
     T Function(dynamic)? fromJsonT,
   }) async {
+    if (baseUrl != null) {
+      _dio.options.baseUrl = baseUrl;
+    }
     try {
       final response = await _dio.delete(
         path,
@@ -147,11 +187,15 @@ class HttpManager {
     required String filePath,
     String? fileName,
     Map<String, dynamic>? data,
+    String? baseUrl,
     Map<String, dynamic>? queryParameters,
     Options? options,
     T Function(dynamic)? fromJsonT,
     ProgressCallback? onSendProgress,
   }) async {
+    if (baseUrl != null) {
+      _dio.options.baseUrl = baseUrl;
+    }
     try {
       fileName ??= filePath.split('/').last;
       final formData = FormData.fromMap({

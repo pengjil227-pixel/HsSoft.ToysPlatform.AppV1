@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../widgets/primart_button.dart';
-import 'widgets/agreement_checkbox.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

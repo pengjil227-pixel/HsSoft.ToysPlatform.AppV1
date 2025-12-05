@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:iconfont/iconfont.dart';
+import 'package:octo_image/octo_image.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/constants/layout_constants.dart';
+import '../../core/providers/home_infos.dart';
+import '../../shared/models/exhibition.dart';
+import '../../shared/models/sales_ads_list.dart';
 import '../../widgets/custom_swiper.dart';
 import '../../widgets/goods_item.dart';
 
@@ -59,12 +64,19 @@ class _RecommendedPageState extends State<RecommendedPage> {
               height: 160,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
-                child: CustomSwiper(
-                  itemCount: 3,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Image.network(
-                      'https://picsum.photos/300/160?i=$index',
-                      fit: BoxFit.cover,
+                child: Selector<HomeInfos, List<SalesAdsList>?>(
+                  selector: (_, model) => model.salesAdsList,
+                  builder: (context, List<SalesAdsList>? value, __) {
+                    if (value == null) return SizedBox.shrink();
+                    return CustomSwiper(
+                      itemCount: value.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return OctoImage(
+                          image: NetworkImage(value[index].imgUrl),
+                          errorBuilder: OctoError.icon(color: Colors.red),
+                          fit: BoxFit.cover,
+                        );
+                      },
                     );
                   },
                 ),
@@ -84,28 +96,40 @@ class _RecommendedPageState extends State<RecommendedPage> {
 
                 return SizedBox(
                   height: itemWidth * 2 / 3,
-                  child: CustomSwiper(
-                    itemCount: 3,
-                    autoplay: false,
-                    defaultPagination: false,
-                    loop: false,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Padding(
-                        padding: EdgeInsets.only(right: LayoutConstants.pagePadding),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [1, 2, 3].map((item) {
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: Image.network(
-                                'https://picsum.photos/300/160?i=$index',
-                                width: itemWidth,
-                                height: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                            );
-                          }).toList(),
-                        ),
+                  child: Selector<HomeInfos, List<Exhibition>?>(
+                    selector: (_, model) => model.onlineExhibitionList,
+                    builder: (context, List<Exhibition>? value, __) {
+                      // 计算每页显示3个，总页数
+                      final itemCount = (value?.length ?? 0 / 3).ceil();
+
+                      return CustomSwiper(
+                        itemCount: itemCount,
+                        autoplay: false,
+                        defaultPagination: false,
+                        loop: false,
+                        itemBuilder: (BuildContext context, int pageIndex) {
+                          return Padding(
+                            padding: EdgeInsets.only(right: LayoutConstants.pagePadding),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: List.generate(3, (itemIndex) {
+                                final dataIndex = pageIndex * 3 + itemIndex;
+                                final exhibition = value![dataIndex];
+
+                                return ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: OctoImage(
+                                    width: itemWidth,
+                                    height: double.infinity,
+                                    image: NetworkImage(exhibition.bgImg),
+                                    errorBuilder: OctoError.icon(color: Colors.red),
+                                    fit: BoxFit.cover,
+                                  ),
+                                );
+                              }),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),

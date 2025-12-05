@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wanhaoniu/src/core/providers/login_user.dart';
 import 'package:iconfont/iconfont.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/constants/layout_constants.dart';
+import '../../core/providers/home_infos.dart';
 import '../../widgets/keep_alive_page.dart';
 import 'factory.dart';
 import 'recommended.dart';
@@ -47,6 +50,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       length: _tabValues.length,
       vsync: this,
     );
+    _init();
+  }
+
+  Future<void> _init() async {
+    await Future.delayed(Duration.zero, () {});
+    if (!mounted) return;
+    context.read<HomeInfos>().updateHomeInfos();
   }
 
   @override
@@ -73,7 +83,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         physics: BouncingScrollPhysics(),
         controller: _tabController,
         children: [
-          KeepAlivePage(child: RecommendedPage()),
+          KeepAlivePage(
+            child: RecommendedPage(),
+          ),
           KeepAlivePage(
               child: SupplyPage(
             provider: _provider,
