@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-
+import 'package:flutter/foundation.dart';
 import '../../shared/models/login_user_info.dart';
 
 class LoginUser extends ChangeNotifier {
@@ -11,6 +10,20 @@ class LoginUser extends ChangeNotifier {
 
   set loginUser(LoginUserInfo? info) {
     LoginInfoSingleton.loginUserInfo = info;
+
+    // 不要删，测接口
+    if (kDebugMode) {
+      final token = info?.accessToken ?? '';
+
+      debugPrint('🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥');
+      debugPrint('  FULL TOKEN BELOW 👇');
+      debugPrint('🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥');
+      debugPrint(token.isEmpty ? 'EMPTY TOKEN' : token);
+      debugPrint('🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥');
+      debugPrint('  FULL TOKEN ABOVE ☝️');
+      debugPrint('🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥');
+    }
+
     notifyListeners();
   }
 

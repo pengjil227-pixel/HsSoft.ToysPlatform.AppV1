@@ -11,8 +11,7 @@ class ProductService {
       baseUrl: companyBaseUrl,
       data: {"level": 0, "keywords": ""},
       fromJsonT: (data) {
-        // 解析列表数据
-        print("测一下有没有数据: $data");
+     
 
         return (data as List<dynamic>)
             .map((e) => ProductClassModel.fromJson(e))
