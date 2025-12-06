@@ -9,7 +9,7 @@ import '../../widgets/custom_swiper.dart';
 import '../../widgets/goods_item.dart';
 import '../../widgets/prickers/string_picker.dart';
 import '../../widgets/primart_button.dart';
-import 'package:go_router/go_router.dart';
+
 class SupplyPage extends StatefulWidget {
   const SupplyPage({
     super.key,
@@ -72,7 +72,11 @@ class _SupplyPageState extends State<SupplyPage> {
               childAspectRatio: 0.9,
             ),
             itemBuilder: (context, index) {
-              return GoodsItem();
+              return Container(
+                height: 50,
+                color: Colors.greenAccent,
+                margin: EdgeInsets.all(10),
+              );
             },
           ),
         ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_wanhaoniu/src/core/providers/login_user.dart';
 import 'package:iconfont/iconfont.dart';
 import 'package:provider/provider.dart';
 

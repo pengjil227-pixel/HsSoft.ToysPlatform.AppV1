@@ -19,16 +19,6 @@ class _MyPageState extends State<MyPage> {
   final ScrollController _scrollController = ScrollController();
 
   @override
-  void initState() {
-    super.initState();
-
-    _init();
-  }
-  _init() async{
-    await Future.delayed(Duration.zero);
-    print(LoginInfoSingleton.loginUserInfo) ;
-  }
-  @override
   void dispose() {
     super.dispose();
     _scrollController.dispose();
@@ -316,7 +306,11 @@ class _MyPageState extends State<MyPage> {
                 childAspectRatio: 0.9,
               ),
               itemBuilder: (context, index) {
-                return GoodsItem();
+                return Container(
+                  height: 50,
+                  color: Colors.greenAccent,
+                  margin: EdgeInsets.all(10),
+                );
               },
             ),
           ),

@@ -1,8 +1,10 @@
-import 'package:flutter_wanhaoniu/src/core/network/api_response.dart';
-
+import '../../../shared/models/company_origin.dart';
 import '../../../shared/models/exhibition.dart';
+import '../../../shared/models/paginated_response.dart';
 import '../../../shared/models/product.dart';
+import '../../../shared/models/product_detail.dart';
 import '../../../shared/models/sales_ads_list.dart';
+import '../api_response.dart';
 import '../http_manager.dart';
 
 const _baseUrl = 'http://192.168.110.150:8221';
@@ -33,15 +35,49 @@ class CompanyService {
     );
   }
 
-  static Future<ApiResponse<List<Product>>> getNewProduct() async {
+  static Future<ApiResponse<PaginatedResponse<ProductItem>>> getNewProduct() async {
     return HttpManager().post(
       '/front/ProductBasic/QueryNewProductPage',
       baseUrl: _baseUrl,
       data: {},
       fromJsonT: (data) {
-        print(data);
-        final List<dynamic> infos = data;
-        return infos.map((info) => Product.fromJson(info)).toList();
+        return PaginatedResponse.fromJson(data, ProductItem.fromJson);
+      },
+    );
+  }
+
+  static Future<ApiResponse<PaginatedResponse<CompanyOrigin>>> getCompanyOriginPage() async {
+    return HttpManager().post(
+      '/front/ToysOrigin/QueryCompanyOriginPage',
+      baseUrl: _baseUrl,
+      data: {},
+      fromJsonT: (data) {
+        return PaginatedResponse.fromJson(data, CompanyOrigin.fromJson);
+      },
+    );
+  }
+
+  static Future<ApiResponse<PaginatedResponse<ProductItem>>> getRecomendProduct() async {
+    return HttpManager().post(
+      '/front/ProductBasic/QueryFrontRecomendProductPage',
+      baseUrl: _baseUrl,
+      data: {
+        "pageNo": 1,
+        "pageSize": 10,
+      },
+      fromJsonT: (data) {
+        return PaginatedResponse.fromJson(data, ProductItem.fromJson);
+      },
+    );
+  }
+
+  static Future<ApiResponse<ProductDetail>> getProductDetail(dynamic data) async {
+    return HttpManager().post(
+      '/front/ProductBasic/GetProductDetail',
+      baseUrl: _baseUrl,
+      data: data,
+      fromJsonT: (data) {
+        return ProductDetail.fromJson(data);
       },
     );
   }

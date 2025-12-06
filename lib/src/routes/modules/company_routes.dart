@@ -24,7 +24,7 @@ class CompanyRoutes {
             path: 'setting',
             name: 'setting',
             builder: (context, state) => Setting(),
-            routes:[
+            routes: [
               GoRoute(
                 path: 'userInfo',
                 name: 'userInfo',
@@ -40,7 +40,6 @@ class CompanyRoutes {
                 name: 'category',
                 builder: (context, state) => const CategoryPage(),
               ),
-
               GoRoute(
                 path: 'factoryDetail',
                 name: 'factoryDetail',
@@ -57,6 +56,16 @@ class CompanyRoutes {
                 builder: (context, state) => const FactoryListPage(),
               ),
             ],
+          ),
+          GoRoute(
+            path: 'goodsDetail/:index',
+            name: 'goodsDetail',
+            builder: (context, state) {
+              final int index = int.parse(state.pathParameters['index']!);
+              return GoodsDetail(
+                currentPage: index,
+              );
+            },
           ),
         ],
       ),

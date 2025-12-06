@@ -1,66 +1,69 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_wanhaoniu/src/core/constants/layout_constants.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/constants/layout_constants.dart';
+import '../shared/models/product.dart';
+
 class GoodsItem extends StatelessWidget {
-  const GoodsItem({super.key});
+  const GoodsItem({
+    super.key,
+    required this.item,
+  });
+
+  final ProductItem item;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return GestureDetector(
-      onTap: () {
-        context.pushNamed('goodsDetail');
-      },
-      child: Container(
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(8.0)),
-                child: Image.network(
-                  'https://picsum.photos/300/160',
-                  fit: BoxFit.cover,
+    return Container(
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(8.0)),
+              child: CachedNetworkImage(
+                imageUrl: item.imgUrl,
+                errorWidget: (context, url, error) => Icon(Icons.error),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(LayoutConstants.pagePadding, 0, LayoutConstants.pagePadding, LayoutConstants.pagePadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.prNa,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 15,
+                    height: 2,
+                  ),
                 ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(LayoutConstants.pagePadding, 0, LayoutConstants.pagePadding, LayoutConstants.pagePadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '商品名称商品名称商品名称商品名称',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15,
-                      height: 2,
-                    ),
+                Row(
+                  children: [
+                    Text('¥${item.faPr}', style: TextStyle(fontSize: 15, color: theme.primaryColor)),
+                    Text('[${item.productNumber}]', style: TextStyle(fontSize: 15, color: Color(0xFF929292))),
+                  ],
+                ),
+                Text(
+                  item.maNa,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF929292),
                   ),
-                  Row(
-                    children: [
-                      Text('¥48.00', style: TextStyle(fontSize: 15, color: theme.primaryColor)),
-                      Text('[W32532]', style: TextStyle(fontSize: 15, color: Color(0xFF929292))),
-                    ],
-                  ),
-                  Text(
-                    '汕头市莱公司',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Color(0xFF929292),
-                    ),
-                  )
-                ],
-              ),
+                )
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

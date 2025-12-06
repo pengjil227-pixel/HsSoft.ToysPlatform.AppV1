@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../shared/models/company_origin.dart';
 import '../../shared/models/exhibition.dart';
+import '../../shared/models/paginated_response.dart';
 import '../../shared/models/product.dart';
 import '../../shared/models/sales_ads_list.dart';
 import '../network/modules/company.dart';
@@ -8,7 +10,6 @@ import '../network/modules/company.dart';
 class HomeInfos extends ChangeNotifier {
   List<SalesAdsList>? _salesAdsList;
   List<SalesAdsList>? get salesAdsList => _salesAdsList;
-
   void _setSalesAdsList(List<SalesAdsList>? value) {
     _salesAdsList = [...?value];
     notifyListeners();
@@ -34,10 +35,10 @@ class HomeInfos extends ChangeNotifier {
     _setOnlineExhibitionList(response.data!);
   }
 
-  List<Product>? _newProduct;
-  List<Product>? get newProduct => _newProduct;
-  void _updateNewProduct(List<Product>? value) {
-    _newProduct = [...?value];
+  PaginatedResponse<ProductItem>? _newProduct;
+  PaginatedResponse<ProductItem>? get newProduct => _newProduct;
+  void _updateNewProduct(PaginatedResponse<ProductItem>? value) {
+    _newProduct = value;
     notifyListeners();
   }
 
@@ -46,11 +47,37 @@ class HomeInfos extends ChangeNotifier {
     _updateNewProduct(response.data!);
   }
 
+  PaginatedResponse<CompanyOrigin>? _companyOrigin;
+  PaginatedResponse<CompanyOrigin>? get companyOrigin => _companyOrigin;
+  void _updateCompanyOrigin(PaginatedResponse<CompanyOrigin>? value) {
+    _companyOrigin = value;
+    notifyListeners();
+  }
+
+  Future<void> _getCompanyOrigin() async {
+    final response = await CompanyService.getCompanyOriginPage();
+    _updateCompanyOrigin(response.data!);
+  }
+
+  PaginatedResponse<ProductItem>? _recomendProduct;
+  PaginatedResponse<ProductItem>? get recomendProduct => _recomendProduct;
+  void _updateRecomendProduct(PaginatedResponse<ProductItem>? value) {
+    _recomendProduct = value;
+    notifyListeners();
+  }
+
+  Future<void> _getRecomendProduct() async {
+    final response = await CompanyService.getRecomendProduct();
+    _updateRecomendProduct(response.data!);
+  }
+
   Future<void> updateHomeInfos() async {
     try {
       _updateSalesAdsList();
       _updateOnlineExhibitionList();
-      // _getNewProduct();
+      _getNewProduct();
+      _getCompanyOrigin();
+      _getRecomendProduct();
     } catch (err) {
       print(err);
     }
