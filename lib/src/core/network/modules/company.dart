@@ -7,6 +7,7 @@ import '../../../shared/models/sales_ads_list.dart';
 import '../api_response.dart';
 import '../http_manager.dart';
 
+// 公司业务接口的基础地址，供其他服务模块复用
 const _baseUrl = 'http://192.168.110.150:8221';
 
 class CompanyService {

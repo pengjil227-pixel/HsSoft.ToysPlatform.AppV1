@@ -20,8 +20,8 @@ class _PageScreenState extends State<PageScreen> {
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
+    super.dispose();
   }
 
   void _onNavigationBarTap(int index) {
@@ -75,7 +75,7 @@ class __BottomNavigationBarState extends State<_BottomNavigationBar> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Divider(
+        const Divider(
           height: 0,
           thickness: 0.6,
         ),
@@ -83,8 +83,8 @@ class __BottomNavigationBarState extends State<_BottomNavigationBar> {
           currentIndex: _current,
           onTap: _onChange,
           type: BottomNavigationBarType.fixed,
-          selectedLabelStyle: TextStyle(fontSize: 12),
-          unselectedLabelStyle: TextStyle(fontSize: 12),
+          selectedLabelStyle: const TextStyle(fontSize: 12),
+          unselectedLabelStyle: const TextStyle(fontSize: 12),
           items: widget.items,
         ),
       ],

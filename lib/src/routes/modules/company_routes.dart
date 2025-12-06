@@ -1,3 +1,4 @@
+import 'package:flutter_wanhaoniu/src/shared/models/source_supplier.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../pages/company/goods_detail.dart';
@@ -11,6 +12,7 @@ import '../../pages/company/category_page.dart';
 import '../../pages/company/sourcefactory/factory_detail.dart';
 import '../../pages/company/sourcefactory/factory_name_page.dart';
 import '../../pages/company/sourcefactory/factory_list_page.dart';
+import '../../shared/models/source_supplier.dart';
 
 class CompanyRoutes {
   static List<GoRoute> get routes {
@@ -43,17 +45,34 @@ class CompanyRoutes {
               GoRoute(
                 path: 'factoryDetail',
                 name: 'factoryDetail',
-                builder: (context, state) => const FactoryDetailPage(),
+                builder: (context, state) => FactoryDetailPage(
+                  supplier: state.extra is SourceSupplier ? state.extra as SourceSupplier : null,
+                ),
               ),
               GoRoute(
                 path: 'factoryName',
                 name: 'factoryName',
-                builder: (context, state) => const FactoryNamePage(),
+                builder: (context, state) {
+                  final extra = state.extra;
+                  SourceSupplier? supplier;
+                  SupplierDetail? detail;
+                  if (extra is SupplierDetail) {
+                    detail = extra;
+                  } else if (extra is SourceSupplier) {
+                    supplier = extra;
+                  } else if (extra is Map) {
+                    if (extra['supplier'] is SourceSupplier) supplier = extra['supplier'] as SourceSupplier;
+                    if (extra['detail'] is SupplierDetail) detail = extra['detail'] as SupplierDetail;
+                  }
+                  return FactoryNamePage(supplier: supplier, detail: detail);
+                },
               ),
               GoRoute(
                 path: 'factoryList',
                 name: 'factoryList',
-                builder: (context, state) => const FactoryListPage(),
+                builder: (context, state) => FactoryListPage(
+                  type: state.extra is FactoryListType ? state.extra as FactoryListType : FactoryListType.all,
+                ),
               ),
             ],
           ),
