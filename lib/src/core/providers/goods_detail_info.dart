@@ -11,4 +11,6 @@ class GoodsDetailInfo extends ChangeNotifier {
   }
 
   late int currentIndex;
+
+  late Function() loadMore;
 }

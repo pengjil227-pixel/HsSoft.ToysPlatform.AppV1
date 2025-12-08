@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconfont/iconfont.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../../core/constants/layout_constants.dart';
 import '../../core/providers/home_infos.dart';
@@ -41,7 +43,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   late final TabController _tabController;
 
   final SortingProvider _provider = SortingProvider();
-
   @override
   void initState() {
     super.initState();
@@ -61,8 +62,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   void dispose() {
     super.dispose();
-    _tabController.dispose();
     _provider.dispose();
+    _tabController.dispose();
   }
 
   @override
@@ -120,6 +121,12 @@ class __AppBarState extends State<_AppBar> {
   };
 
   @override
+  void dispose() {
+    super.dispose();
+    _tabType.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
@@ -148,73 +155,78 @@ class __AppBarState extends State<_AppBar> {
                   },
                 ),
               ),
-              Container(
-                height: 34,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: theme.primaryColor,
-                    width: 1,
+              GestureDetector(
+                onTap: () {
+                  context.pushNamed('search');
+                },
+                child: Container(
+                  height: 34,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: theme.primaryColor,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(10.0),
+                      bottomLeft: Radius.circular(10.0),
+                      bottomRight: Radius.circular(10.0),
+                    ),
                   ),
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(10.0),
-                    bottomLeft: Radius.circular(10.0),
-                    bottomRight: Radius.circular(10.0),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 34,
-                      height: 34,
-                      child: Align(
-                        child: Icon(
-                          Iconfont.saoma,
-                          size: 18,
-                          color: theme.primaryColor,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 34,
+                        height: 34,
+                        child: Align(
+                          child: Icon(
+                            Iconfont.saoma,
+                            size: 18,
+                            color: theme.primaryColor,
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: ValueListenableBuilder<_SearchTypes>(
-                        valueListenable: _tabType,
-                        builder: (_, _SearchTypes value, __) {
-                          return Text(
-                            _tabText[value]!,
-                            style: TextStyle(
-                              color: Color(0xFFCACFD2),
-                              fontSize: 12,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    SizedBox(
-                      width: 40,
-                      height: 34,
-                      child: Align(
-                        child: Icon(
-                          Iconfont.paizhao,
-                          size: 18,
-                          color: Color(0xFF929292),
+                      Expanded(
+                        child: ValueListenableBuilder<_SearchTypes>(
+                          valueListenable: _tabType,
+                          builder: (_, _SearchTypes value, __) {
+                            return Text(
+                              _tabText[value]!,
+                              style: TextStyle(
+                                color: Color(0xFFCACFD2),
+                                fontSize: 12,
+                              ),
+                            );
+                          },
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                      child: VerticalDivider(
-                        width: 0,
-                        thickness: 0.5,
-                        color: Color(0xFFCACFD2),
+                      SizedBox(
+                        width: 40,
+                        height: 34,
+                        child: Align(
+                          child: Icon(
+                            Iconfont.paizhao,
+                            size: 18,
+                            color: Color(0xFF929292),
+                          ),
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        '搜索',
-                        style: TextStyle(color: theme.primaryColor, fontSize: 13),
+                      SizedBox(
+                        height: 10,
+                        child: VerticalDivider(
+                          width: 0,
+                          thickness: 0.5,
+                          color: Color(0xFFCACFD2),
+                        ),
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          '搜索',
+                          style: TextStyle(color: theme.primaryColor, fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -242,7 +254,7 @@ class __AppBarState extends State<_AppBar> {
               tabs: _tabValues.map((tab) => Tab(text: tab.text)).toList(),
             ),
           ),
-        )
+        ),
       ],
     );
   }

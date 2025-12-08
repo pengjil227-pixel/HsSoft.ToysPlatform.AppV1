@@ -6,6 +6,20 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "30796103",
+      "name": "loading",
+      "font_class": "loading",
+      "unicode": "e689",
+      "unicode_decimal": 59017
+    },
+    {
+      "icon_id": "46277855",
+      "name": "已下架",
+      "font_class": "yixiajia",
+      "unicode": "e687",
+      "unicode_decimal": 59015
+    },
+    {
       "icon_id": "46236459",
       "name": "多窗口模式",
       "font_class": "duochuangkoumoshi",

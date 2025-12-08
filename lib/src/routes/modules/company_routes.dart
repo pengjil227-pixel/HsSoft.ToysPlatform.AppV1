@@ -1,8 +1,9 @@
-import 'package:flutter_wanhaoniu/src/shared/models/source_supplier.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../pages/company/goods_detail.dart';
 import '../../pages/company/home_screen.dart';
+import '../../pages/company/search.dart';
 import '../../pages/company/setting.dart';
 //个人信息
 import '../../pages/company/setting_pages/user_info_page.dart';
@@ -83,6 +84,15 @@ class CompanyRoutes {
               final int index = int.parse(state.pathParameters['index']!);
               return GoodsDetail(
                 currentPage: index,
+              );
+            },
+          ),
+          GoRoute(
+            path: 'search',
+            name: 'search',
+            pageBuilder: (_, GoRouterState state) {
+              return NoTransitionPage(
+                child: SearchPage(),
               );
             },
           ),

@@ -1,8 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../core/constants/layout_constants.dart';
+import '../core/providers/goods_detail_info.dart';
+import '../shared/models/paginated_response.dart';
 import '../shared/models/product.dart';
 
 class GoodsItem extends StatelessWidget {
@@ -65,6 +68,52 @@ class GoodsItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class ProductsBuilder extends StatelessWidget {
+  const ProductsBuilder({
+    super.key,
+    required this.item,
+    required this.loadMore,
+  });
+
+  final PaginatedResponse<ProductItem> item;
+
+  final Function() loadMore;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverGrid.builder(
+      itemCount: item.rows.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: LayoutConstants.pagePadding,
+        mainAxisSpacing: LayoutConstants.pagePadding,
+        childAspectRatio: 0.9,
+      ),
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () {
+            final goodsDetailInfo = context.read<GoodsDetailInfo>();
+            goodsDetailInfo.products = item.rows;
+            goodsDetailInfo.currentIndex = index;
+            goodsDetailInfo.loadMore = loadMore;
+
+            context.pushNamed(
+              'goodsDetail',
+              pathParameters: {
+                'index': index.toString(),
+              },
+            );
+          },
+          child: GoodsItem(
+            key: ValueKey(item.rows[index].productNumber),
+            item: item.rows[index],
+          ),
+        );
+      },
     );
   }
 }

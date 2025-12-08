@@ -7,6 +7,7 @@ import 'constants.dart';
 const String _fontFamily = 'Colorfont';
 
 class Colorfont {
+  static const IconData loading = IconData(0xe689, fontFamily: _fontFamily, fontPackage: packageName);
   static const IconData gongzuotai_selected = IconData(0xe645, fontFamily: _fontFamily, fontPackage: packageName);
   static const IconData zeyangche = IconData(0xe646, fontFamily: _fontFamily, fontPackage: packageName);
   static const IconData wode_selected = IconData(0xe644, fontFamily: _fontFamily, fontPackage: packageName);

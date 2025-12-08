@@ -6,6 +6,13 @@
   "description": "color icon",
   "glyphs": [
     {
+      "icon_id": "30796103",
+      "name": "loading",
+      "font_class": "loading",
+      "unicode": "e689",
+      "unicode_decimal": 59017
+    },
+    {
       "icon_id": "46231740",
       "name": "工作台-selected",
       "font_class": "gongzuotai-selected",

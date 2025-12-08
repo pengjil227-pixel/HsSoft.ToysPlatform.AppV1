@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'src/core/constants/app_constants.dart';
 import 'src/core/providers/goods_detail_info.dart';
@@ -48,24 +49,28 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: '玩好牛',
-      debugShowCheckedModeBanner: false,
-      scrollBehavior: MaterialScrollBehavior().copyWith(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        physics: BouncingScrollPhysics(),
+    return RefreshConfiguration(
+      headerTriggerDistance: 70,
+      springDescription: SpringDescription(mass: 0.3, stiffness: 140.0, damping: 14),
+      child: MaterialApp.router(
+        title: '玩好牛',
+        debugShowCheckedModeBanner: false,
+        scrollBehavior: MaterialScrollBehavior().copyWith(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          physics: BouncingScrollPhysics(),
+        ),
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: [
+          const Locale('zh', 'CN'),
+          // const Locale('en', 'US'),
+        ],
+        theme: CmsTheme.lightTheme,
+        routerConfig: route,
       ),
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: [
-        const Locale('zh', 'CN'),
-        // const Locale('en', 'US'),
-      ],
-      theme: CmsTheme.lightTheme,
-      routerConfig: route,
     );
   }
 }

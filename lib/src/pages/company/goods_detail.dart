@@ -3,15 +3,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wanhaoniu/src/core/constants/layout_constants.dart';
 import 'package:flutter_wanhaoniu/src/core/providers/goods_detail_info.dart';
+import 'package:flutter_wanhaoniu/src/core/providers/home_infos.dart';
 import 'package:flutter_wanhaoniu/src/widgets/primart_button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconfont/iconfont.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/network/modules/company.dart';
+import '../../core/network/modules/product_detail.dart';
+import '../../shared/models/paginated_response.dart';
 import '../../shared/models/product.dart';
 import '../../shared/models/product_detail.dart';
 import '../../widgets/custom_swiper.dart';
+import '../../widgets/goods_item.dart';
 
 class GoodsDetail extends StatefulWidget {
   const GoodsDetail({
@@ -40,14 +44,15 @@ class _GoodsDetailState extends State<GoodsDetail> {
     _init();
   }
 
-  void _init() {
+  Future<void> _init() async {
     _currentPage = widget.currentPage;
     _pageController = PageController(initialPage: widget.currentPage);
     _pageController.addListener(_pageControllerListener);
-    _getDetailInfo();
+    await _getDetailInfo();
   }
 
   Future<void> _getDetailInfo() async {
+    _productDetail.value = null;
     final products = context.read<GoodsDetailInfo>().products;
     final currentInfo = products[_currentPage];
     final infoDetail = await CompanyService.getProductDetail({
@@ -60,13 +65,18 @@ class _GoodsDetailState extends State<GoodsDetail> {
   }
 
   void _pageControllerListener() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!_pageController.position.isScrollingNotifier.value) {
         final index = _pageController.page!.round();
         if (_currentPage != index) {
           _currentPage = index;
           _alpha.value = 0.0;
-          _getDetailInfo();
+          await _getDetailInfo();
+          if (!mounted) return;
+          final goodsDetailInfoModal = context.read<GoodsDetailInfo>();
+          if (_currentPage > goodsDetailInfoModal.products.length - 3) {
+            goodsDetailInfoModal.loadMore.call();
+          }
         }
       }
     });
@@ -76,8 +86,9 @@ class _GoodsDetailState extends State<GoodsDetail> {
   void dispose() {
     super.dispose();
     _alpha.dispose();
-    _pageController.dispose();
+    _productDetail.dispose();
     _pageController.removeListener(_pageControllerListener);
+    _pageController.dispose();
   }
 
   @override
@@ -96,16 +107,18 @@ class _GoodsDetailState extends State<GoodsDetail> {
       ),
       body: Consumer<GoodsDetailInfo>(
         builder: (context, GoodsDetailInfo value, __) {
+          final products = value.products;
           return ValueListenableBuilder(
             valueListenable: _productDetail,
             builder: (context, detail, __) {
               return PageView.builder(
-                itemCount: value.products.length,
+                itemCount: products.length,
                 controller: _pageController,
                 itemBuilder: (context, index) {
                   return _DetailItem(
+                    key: ValueKey(products[index].productNumber),
                     productDetail: _currentPage == index ? detail : null,
-                    productInfo: value.products[index],
+                    productInfo: products[index],
                     onScroll: (double value) {
                       _alpha.value = value;
                     },
@@ -257,10 +270,15 @@ class __DetailItemState extends State<_DetailItem> {
   final double _gap = 250;
   final ValueNotifier<double> _alpha = ValueNotifier<double>(0.0);
 
+  final double _bottomHeight = 50;
+
+  final ValueNotifier<PaginatedResponse<ProductItem>?> _recommended = ValueNotifier<PaginatedResponse<ProductItem>?>(null);
+
   @override
   void initState() {
     super.initState();
     _controller.addListener(_controllerListener);
+    _getRecommended();
   }
 
   @override
@@ -268,6 +286,12 @@ class __DetailItemState extends State<_DetailItem> {
     super.dispose();
     _alpha.dispose();
     _controller.removeListener(_controllerListener);
+    _recommended.dispose();
+  }
+
+  Future<void> _getRecommended() async {
+    final response = await ProductDetailService.queryDetailRecommendProductPage({});
+    _recommended.value = response.data;
   }
 
   void _controllerListener() {
@@ -278,6 +302,25 @@ class __DetailItemState extends State<_DetailItem> {
     if (alpha == _alpha.value) return;
     _alpha.value = alpha;
     widget.onScroll(alpha);
+  }
+
+  Widget _detaiBuilder(
+    String leading,
+    String title,
+  ) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: Row(children: [
+        ConstrainedBox(
+          constraints: BoxConstraints(minWidth: 90),
+          child: Text(
+            leading,
+            style: TextStyle(color: Color(0xFF929292)),
+          ),
+        ),
+        Text(title)
+      ]),
+    );
   }
 
   @override
@@ -293,6 +336,7 @@ class __DetailItemState extends State<_DetailItem> {
           physics: AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
+              key: ValueKey(hasDetail),
               child: SizedBox(
                 height: 300,
                 child: hasDetail
@@ -376,14 +420,8 @@ class __DetailItemState extends State<_DetailItem> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  child: Theme(
-                    data: ThemeData(
-                      listTileTheme: ListTileThemeData(
-                        leadingAndTrailingTextStyle: TextStyle(fontSize: 15, color: Colors.grey),
-                        minLeadingWidth: 80,
-                        visualDensity: VisualDensity(vertical: -4),
-                      ),
-                    ),
+                  child: DefaultTextStyle(
+                    style: TextStyle(fontSize: 15, color: Color(0xFF111111)),
                     child: Column(
                       children: [
                         Row(
@@ -426,17 +464,16 @@ class __DetailItemState extends State<_DetailItem> {
                             )
                           ],
                         ),
-                        ListTile(leading: Text('出厂货号'), title: Text(_product!.faNo)),
-                        ListTile(leading: Text('来源展厅'), title: Text(_product!.exhibitionName)),
-                        ListTile(leading: Text('包装'), title: Text(_product!.chPa)),
-                        ListTile(leading: Text('种类名称'), title: Text(_product!.clNa)),
-                        ListTile(leading: Text('外箱规格'), title: Text('${_product!.inLe}x${_product!.inWi}x${_product!.inHi}(cm)')),
-                        ListTile(leading: Text('装箱量'), title: Text('${_product!.attestationCount}')),
-                        ListTile(leading: Text('外箱规格'), title: Text('${_product!.ouLe}x${_product!.ouWi}x${_product!.ouHi}(cm)')),
-                        ListTile(leading: Text('毛重/净重'), title: Text('${_product!.neWePr}')),
-                        ListTile(leading: Text('体积/材积'), title: Text('${_product!.prLe}x${_product!.prWi}x${_product!.prHi}(cm)')),
-                        ListTile(leading: Text('更新时间'), title: Text(_product!.createdTime)),
-                        ListTile(leading: Text('上架时间'), title: Text(_product!.updatedTime)),
+                        _detaiBuilder('来源展厅', _product!.exhibitionName),
+                        _detaiBuilder('包装', _product!.chPa),
+                        _detaiBuilder('种类名称', _product!.clNa),
+                        _detaiBuilder('外箱规格', '${_product!.inLe}x${_product!.inWi}x${_product!.inHi}(cm)'),
+                        _detaiBuilder('装箱量', '${_product!.attestationCount}'),
+                        _detaiBuilder('外箱规格', '${_product!.ouLe}x${_product!.ouWi}x${_product!.ouHi}(cm)'),
+                        _detaiBuilder('毛重/净重', '${_product!.neWePr}'),
+                        _detaiBuilder('体积/材积', '${_product!.prLe}x${_product!.prWi}x${_product!.prHi}(cm)'),
+                        _detaiBuilder('更新时间', _product!.createdTime),
+                        _detaiBuilder('上架时间', _product!.updatedTime),
                       ],
                     ),
                   ),
@@ -542,6 +579,36 @@ class __DetailItemState extends State<_DetailItem> {
                   ),
                 ),
               ),
+            ValueListenableBuilder(
+              valueListenable: _recommended,
+              builder: (context, value, _) {
+                if (_product == null || value == null) return SliverPadding(padding: EdgeInsets.zero);
+                return SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 44,
+                    child: Align(
+                      child: Text(
+                        '产品推荐',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            ValueListenableBuilder(
+              valueListenable: _recommended,
+              builder: (context, value, _) {
+                if (_product == null || value == null) return SliverPadding(padding: EdgeInsets.zero);
+                return SliverPadding(
+                  padding: EdgeInsets.fromLTRB(LayoutConstants.pagePadding, LayoutConstants.pagePadding, LayoutConstants.pagePadding, LayoutConstants.pagePadding),
+                  sliver: ProductsBuilder(
+                    item: value,
+                    loadMore: () {},
+                  ),
+                );
+              },
+            ),
             // SliverList.builder(
             //   itemCount: 10,
             //   itemBuilder: (context, index) {
@@ -551,17 +618,6 @@ class __DetailItemState extends State<_DetailItem> {
             //       fit: BoxFit.contain,
             //     );
             //   },
-            // ),
-            // SliverToBoxAdapter(
-            //   child: SizedBox(
-            //     height: 44,
-            //     child: Align(
-            //       child: Text(
-            //         '产品推荐',
-            //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            //       ),
-            //     ),
-            //   ),
             // ),
             // SliverPadding(
             //   padding: EdgeInsets.fromLTRB(
@@ -583,6 +639,8 @@ class __DetailItemState extends State<_DetailItem> {
             //     },
             //   ),
             // ),
+
+            SliverPadding(padding: EdgeInsets.only(bottom: LayoutConstants.pagePadding * 2 + View.of(context).padding.bottom / View.of(context).devicePixelRatio + _bottomHeight))
           ],
         ),
         ValueListenableBuilder<double>(
@@ -601,80 +659,90 @@ class __DetailItemState extends State<_DetailItem> {
             left: 0,
             child: Container(
               color: Colors.white,
-              padding: EdgeInsets.fromLTRB(4, LayoutConstants.pagePadding, 4, LayoutConstants.pagePadding + View.of(context).padding.bottom / View.of(context).devicePixelRatio),
-              child: Row(
-                children: [
-                  SizedBox(
-                    height: 44,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Iconfont.dianpu1,
-                          color: Color(0xFF929292),
-                          size: 18,
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          '店铺',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF929292)),
-                        ),
-                      ],
+              padding: EdgeInsets.fromLTRB(4, LayoutConstants.pagePadding, 8, LayoutConstants.pagePadding + View.of(context).padding.bottom / View.of(context).devicePixelRatio),
+              child: SizedBox(
+                height: _bottomHeight,
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Iconfont.dianpu1,
+                            color: Color(0xFF929292),
+                            size: 18,
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '店铺',
+                            style: TextStyle(fontSize: 12, color: Color(0xFF929292)),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Iconfont.shoucang1,
-                          color: Color(0xFF929292),
-                          size: 18,
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          '收藏',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF929292)),
-                        ),
-                      ],
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Iconfont.shoucang1,
+                            color: Color(0xFF929292),
+                            size: 18,
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '收藏',
+                            style: TextStyle(fontSize: 12, color: Color(0xFF929292)),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Iconfont.fenxiang1,
-                          color: Color(0xFF929292),
-                          size: 18,
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          '店铺',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF929292)),
-                        ),
-                      ],
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Iconfont.fenxiang1,
+                            color: Color(0xFF929292),
+                            size: 18,
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '店铺',
+                            style: TextStyle(fontSize: 12, color: Color(0xFF929292)),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 20),
-                      child: PrimartButton(
-                        color: theme.primaryColor,
-                        onPressed: () {},
-                        child: Text(
-                          '加入购物车',
-                          style: TextStyle(color: Colors.white),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 20),
+                        child: PrimartButton(
+                          color: theme.primaryColor,
+                          onPressed: () {
+                            context.pushNamed(
+                              'goodsDetail',
+                              pathParameters: {
+                                'index': '9',
+                              },
+                            );
+                          },
+                          child: Text(
+                            '加入购物车',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
