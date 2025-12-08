@@ -60,11 +60,11 @@ class _PhoneLoginState extends State<PhoneLogin> {
 
     if (response.success) {
       final token = response.data?.accessToken ?? '';
-      if (token.isNotEmpty) {
-        debugPrint('\n========== LOGIN TOKEN ==========\n$token\n=================================\n');
-      } else {
-        debugPrint('\n========== LOGIN TOKEN ==========\n<empty>\n=================================\n');
-      }
+      // if (token.isNotEmpty) {
+      //   debugPrint('\n========== LOGIN TOKEN ==========\n$token\n=================================\n');
+      // } else {
+      //   debugPrint('\n========== LOGIN TOKEN ==========\n<empty>\n=================================\n');
+      // }
       // await saveLoginUserInfo(response.data!.toJson().toString());
       if (!context.mounted) return;
       // context.read<LoginUser>().loginUser = response.data;

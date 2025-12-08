@@ -13,9 +13,7 @@ class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
   static final List<Widget> _pages = [
-    KeepAlivePage(
-      child: ChangeNotifierProvider(create: (_) => HomeInfos(), child: HomePage()),
-    ),
+    KeepAlivePage(child: HomePage()),
     KeepAlivePage(child: MessagePage()),
     KeepAlivePage(child: MyPage()),
   ];
