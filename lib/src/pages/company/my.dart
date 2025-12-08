@@ -183,37 +183,37 @@ class _MyPageState extends State<MyPage> {
 
   final List<_Action> _subActions = [
     _Action(
-      text: '浏览记录',
+      text: '公司信息',
       actionType: _ActionType.information,
     ),
     _Action(
-      text: '收藏产品',
+      text: '账号管理',
       actionType: _ActionType.management,
     ),
     _Action(
-      text: '关注厂商',
+      text: '在线客服',
       actionType: _ActionType.service,
     ),
     _Action(
-      text: '择样报价',
+      text: '产品对比',
       actionType: _ActionType.comparison,
     ),
   ];
   final List<_Action> _actions = [
     _Action(
-      text: '公司信息',
+      text: '浏览记录',
       actionType: _ActionType.browse,
     ),
     _Action(
-      text: '账号管理',
+      text: '收藏产品',
       actionType: _ActionType.collection,
     ),
     _Action(
-      text: '在线客服',
+      text: '关注厂商',
       actionType: _ActionType.follow,
     ),
     _Action(
-      text: '产品对比',
+      text: '择样报价',
       actionType: _ActionType.sample,
     ),
   ];
@@ -252,11 +252,23 @@ class _MyPageState extends State<MyPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: _actions.map((action) {
-                          return _actionBuilder(
-                            text: action.text,
-                            child: Text(
-                              '1',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, height: 1.2),
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(6),
+                            onTap: () {
+                              if (action.routeName != null) {
+                                context.pushNamed(action.routeName!);
+                              }
+                            },
+                        
+                       child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                              child: _actionBuilder(
+                                text: action.text,
+                                child: Text(
+                                  '1',
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, height: 1.2),
+                                ),
+                              ),
                             ),
                           );
                         }).toList(),
@@ -273,18 +285,26 @@ class _MyPageState extends State<MyPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: _subActions.map((action) {
-                        return _actionBuilder(
-                          text: action.text,
-                          child: Container(
-                            width: 30,
-                            height: 30,
-                            decoration: BoxDecoration(
-                              color: Colors.greenAccent,
-                              borderRadius: BorderRadius.circular(100),
-                            ),
-                            child: Icon(
-                              Icons.access_time_outlined,
-                              color: Colors.white,
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(6),
+                          onTap: () {
+                            if (action.routeName != null) {
+                              context.pushNamed(action.routeName!);
+                            }
+                          },
+                          child: _actionBuilder(
+                            text: action.text,
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: Colors.greenAccent,
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              child: Icon(
+                                Icons.access_time_outlined,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         );
@@ -328,6 +348,24 @@ class _Action {
     required this.text,
     required this.actionType,
   });
+
+  String? get routeName {
+    switch (actionType) {
+      case _ActionType.information:
+        return 'companyInfo';
+      case _ActionType.management:
+        return 'accountManage';
+      case _ActionType.service:
+        return 'onlineService';
+      case _ActionType.comparison:
+        return 'productCompare';
+      case _ActionType.browse:
+      case _ActionType.collection:
+      case _ActionType.follow:
+      case _ActionType.sample:
+        return null;
+    }
+  }
 }
 
 enum _ActionType {

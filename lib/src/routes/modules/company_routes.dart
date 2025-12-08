@@ -12,7 +12,10 @@ import '../../pages/company/category_page.dart';
 import '../../pages/company/sourcefactory/factory_detail.dart';
 import '../../pages/company/sourcefactory/factory_name_page.dart';
 import '../../pages/company/sourcefactory/factory_list_page.dart';
-import '../../shared/models/source_supplier.dart';
+import '../../pages/company/my/company_info_page.dart';
+import '../../pages/company/my/account_manage_page.dart';
+import '../../pages/company/my/online_service_page.dart';
+import '../../pages/company/my/product_compare_page.dart';
 
 class CompanyRoutes {
   static List<GoRoute> get routes {
@@ -85,6 +88,26 @@ class CompanyRoutes {
                 currentPage: index,
               );
             },
+          ),
+          GoRoute(
+            path: 'companyInfo',
+            name: 'companyInfo',
+            builder: (context, state) => const CompanyInfoPage(),
+          ),
+          GoRoute(
+            path: 'accountManage',
+            name: 'accountManage',
+            builder: (context, state) => const AccountManagePage(),
+          ),
+          GoRoute(
+            path: 'onlineService',
+            name: 'onlineService',
+            builder: (context, state) => const OnlineServicePage(),
+          ),
+          GoRoute(
+            path: 'productCompare',
+            name: 'productCompare',
+            builder: (context, state) => const ProductComparePage(),
           ),
         ],
       ),
