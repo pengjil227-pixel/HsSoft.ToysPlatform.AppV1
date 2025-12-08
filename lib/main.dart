@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'src/core/constants/app_constants.dart';
+import 'src/core/providers/home_infos.dart';
 import 'src/core/providers/goods_detail_info.dart';
 import 'src/core/providers/login_user.dart';
 import 'src/core/theme/cms_theme/cms_theme.dart';
@@ -35,10 +36,11 @@ void main() async {
     providers: [
       ChangeNotifierProvider(create: (_) => LoginUser()),
       ChangeNotifierProvider(create: (_) => GoodsDetailInfo()),
+      ChangeNotifierProvider(create: (_) => HomeInfos()),
     ],
     child: MyApp(),
   ));
-}
+} 
 
 class MyApp extends StatelessWidget {
   MyApp({

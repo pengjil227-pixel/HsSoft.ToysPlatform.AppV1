@@ -58,7 +58,7 @@ class ProductItem {
       exhibitionNumber: json['exhibitionNumber'],
       supplierNumber: json['supplierNumber'],
       productNumber: json['productNumber'],
-      faPr: (json['fa_Pr'] as num).toDouble(),
+      faPr: (json['fa_Pr'] as num?)?.toDouble() ?? 0.0,
       exhibitionName: json['exhibitionName'],
       refreshTime: json['refreshTime'],
       isPlatNew: json['isPlatNew'],

@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_wanhaoniu/src/pages/company/search.dart';
+import 'package:flutter_wanhaoniu/src/shared/models/source_supplier.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../pages/company/goods_detail.dart';
 import '../../pages/company/home_screen.dart';
-import '../../pages/company/search.dart';
 import '../../pages/company/setting.dart';
 //个人信息
 import '../../pages/company/setting_pages/user_info_page.dart';
@@ -13,7 +13,10 @@ import '../../pages/company/category_page.dart';
 import '../../pages/company/sourcefactory/factory_detail.dart';
 import '../../pages/company/sourcefactory/factory_name_page.dart';
 import '../../pages/company/sourcefactory/factory_list_page.dart';
-import '../../shared/models/source_supplier.dart';
+import '../../pages/company/my/company_info_page.dart';
+import '../../pages/company/my/account_manage_page.dart';
+import '../../pages/company/my/online_service_page.dart';
+import '../../pages/company/my/product_compare_page.dart';
 
 class CompanyRoutes {
   static List<GoRoute> get routes {
@@ -88,12 +91,30 @@ class CompanyRoutes {
             },
           ),
           GoRoute(
+            path: 'companyInfo',
+            name: 'companyInfo',
+            builder: (context, state) => const CompanyInfoPage(),
+          ),
+          GoRoute(
+            path: 'accountManage',
+            name: 'accountManage',
+            builder: (context, state) => const AccountManagePage(),
+          ),
+          GoRoute(
+            path: 'onlineService',
+            name: 'onlineService',
+            builder: (context, state) => const OnlineServicePage(),
+          ),
+          GoRoute(
+            path: 'productCompare',
+            name: 'productCompare',
+            builder: (context, state) => const ProductComparePage(),
+          ),
+          GoRoute(
             path: 'search',
             name: 'search',
-            pageBuilder: (_, GoRouterState state) {
-              return NoTransitionPage(
-                child: SearchPage(),
-              );
+            builder: (context, state) {
+              return SearchPage();
             },
           ),
         ],

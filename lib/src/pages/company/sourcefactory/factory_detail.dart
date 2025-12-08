@@ -1,9 +1,13 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconfont/iconfont.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/network/modules/factory_service.dart';
+import '../../../core/providers/goods_detail_info.dart';
+import '../../../shared/models/product.dart';
 import '../../../shared/models/source_supplier.dart';
+import '../../../widgets/goods_item.dart';
 import 'widgets/contact_dialog.dart';
 
 class FactoryDetailPage extends StatefulWidget {
@@ -25,6 +29,12 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
   String? _error;
   bool _contactLoading = false;
   String? _contactError;
+  bool _loadingRecommendProducts = true;
+  String? _errorRecommendProducts;
+  List<ProductItem> _recommendProducts = [];
+  bool _loadingLatestProducts = true;
+  String? _errorLatestProducts;
+  List<ProductItem> _latestProducts = [];
 
   @override
   void initState() {
@@ -73,11 +83,15 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
           _detail = res.data;
           _loading = false;
         });
+        _loadRecommendProducts();
+        _loadLatestProducts();
       } else {
         setState(() {
           _loading = false;
           _error = res.message;
         });
+        _loadRecommendProducts();
+        _loadLatestProducts();
       }
     } catch (e) {
       if (!mounted) return;
@@ -85,6 +99,8 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
         _loading = false;
         _error = e.toString();
       });
+      _loadRecommendProducts();
+      _loadLatestProducts();
     }
   }
 
@@ -160,25 +176,80 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.only(top: 12),
+          padding: EdgeInsets.zero,
           sliver: SliverContainer(
             decoration: const BoxDecoration(color: Colors.white),
-            sliver: SliverPadding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
-              sliver: SliverGrid(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    return const _ProductItem();
-                  },
-                  childCount: 20,
-                ),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: itemAspectRatio,
-                ),
-              ),
+            sliver: Builder(
+              builder: (context) {
+                if (_loadingRecommendProducts) {
+                  return const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  );
+                }
+
+                if (_errorRecommendProducts != null) {
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: Text(
+                          '加载失败：$_errorRecommendProducts',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                if (_recommendProducts.isEmpty) {
+                  return const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: Text('暂无推荐产品')),
+                    ),
+                  );
+                }
+
+                return SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 20),
+                  sliver: SliverGrid.builder(
+                    itemCount: _recommendProducts.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                      childAspectRatio: itemAspectRatio,
+                    ),
+                    itemBuilder: (context, index) {
+                      final item = _recommendProducts[index];
+                      void openDetail() {
+                        final goodsDetailInfo = context.read<GoodsDetailInfo>();
+                        goodsDetailInfo.products = _recommendProducts;
+                        goodsDetailInfo.currentIndex = index;
+
+                        context.pushNamed(
+                          'goodsDetail',
+                          pathParameters: {'index': index.toString()},
+                        );
+                      }
+                      return GestureDetector(
+                        onTap: openDetail,
+                        child: GoodsItem(
+                          item: item,
+                          showActionButton: true,
+                          onActionTap: openDetail,
+                          backgroundColor: const Color(0xFFF4F4F4),
+                          imagePadding: const EdgeInsets.fromLTRB(3, 3, 3, 0),
+                          imageOuterPadding: const EdgeInsets.fromLTRB(3, 3, 3, 0),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -307,57 +378,91 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             child: _buildSectionHeader(theme, '最新产品'),
           ),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              double totalWidth = constraints.maxWidth;
-              double itemWidth = (totalWidth - 24 - 10) / 2;
-              double itemHeight = itemWidth / itemAspectRatio;
+          if (_loadingLatestProducts)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (_errorLatestProducts != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: Text(
+                  '加载失败：$_errorLatestProducts',
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            )
+          else if (_latestProducts.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Center(child: Text('暂无最新产品')),
+            )
+          else
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final totalWidth = constraints.maxWidth;
+                final itemWidth = (totalWidth - 16 - 8) / 2; // 左右各 8，间距 8
+                final itemHeight = itemWidth / itemAspectRatio;
+                final pageCount = (_latestProducts.length / 2).ceil();
 
-              return SizedBox(
-                height: itemHeight,
-                child: PageView.builder(
-                  controller: _pageController,
-                  itemCount: 3,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
-                  },
-                  itemBuilder: (context, pageIndex) {
+                return Column(
+                  children: [
+                    SizedBox(
+                      height: itemHeight,
+                      child: PageView.builder(
+                        controller: _pageController,
+                        itemCount: pageCount,
+                        onPageChanged: (index) {
+                          setState(() {
+                            _currentIndex = index;
+                          });
+                        },
+                        itemBuilder: (context, pageIndex) {
+                          final leftIndex = pageIndex * 2;
+                          final rightIndex = leftIndex + 1;
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Row(
-                        children: const [
-                          Expanded(child: _ProductItem()),
-                          SizedBox(width: 10),
-                          Expanded(child: _ProductItem()),
+                        children: [
+                          Expanded(
+                            child: _buildGoodsItemCard(_latestProducts[leftIndex], leftIndex),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: rightIndex < _latestProducts.length
+                                ? _buildGoodsItemCard(_latestProducts[rightIndex], rightIndex)
+                                : const SizedBox.shrink(),
+                          ),
                         ],
                       ),
                     );
-                  },
-                ),
-              );
-            },
-          ),
-          Container(
-            height: 20,
-            alignment: Alignment.center,
-            margin: const EdgeInsets.only(top: 4, bottom: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(3, (index) {
-                return Container(
-                  width: 6,
-                  height: 6,
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _currentIndex == index ? theme.primaryColor : const Color(0xFFCACFD2),
-                  ),
+                        },
+                      ),
+                    ),
+                    Container(
+                      height: 20,
+                      alignment: Alignment.center,
+                      margin: const EdgeInsets.only(top: 4, bottom: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(pageCount, (index) {
+                          return Container(
+                            width: 6,
+                            height: 6,
+                            margin: const EdgeInsets.symmetric(horizontal: 3),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _currentIndex == index ? theme.primaryColor : const Color(0xFFCACFD2),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                  ],
                 );
-              }),
+              },
             ),
-          ),
         ],
       ),
     );
@@ -380,6 +485,27 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
     );
   }
 
+  Widget _buildGoodsItemCard(ProductItem item, int indexInList) {
+    void openDetail() {
+      final goodsDetailInfo = context.read<GoodsDetailInfo>();
+      goodsDetailInfo.products = _latestProducts;
+      goodsDetailInfo.currentIndex = indexInList;
+      context.pushNamed('goodsDetail', pathParameters: {'index': indexInList.toString()});
+    }
+
+    return GestureDetector(
+      onTap: openDetail,
+      child: GoodsItem(
+        item: item,
+        showActionButton: true,
+        onActionTap: openDetail,
+        backgroundColor: const Color(0xFFF4F4F4),
+        imagePadding: const EdgeInsets.fromLTRB(3, 3, 3, 0),
+        imageOuterPadding: const EdgeInsets.fromLTRB(3, 3, 3, 0),
+      ),
+    );
+  }
+
   void _showContactDialog() async {
     if (_contact == null && !_contactLoading) {
       await _fetchContact();
@@ -394,109 +520,93 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
       error: _contactError,
     );
   }
-}
 
-class _ProductItem extends StatelessWidget {
-  const _ProductItem();
+  String? get _supplierNumber => _detail?.supplierNumber ?? widget.supplier?.supplierNumber;
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    const itemBgColor = Color(0xFFF4F4F4);
+  Future<void> _loadLatestProducts() async {
+    final supplierNumber = _supplierNumber;
+    if (supplierNumber == null || supplierNumber.isEmpty) {
+      setState(() {
+        _loadingLatestProducts = false;
+        _latestProducts = [];
+      });
+      return;
+    }
 
-    return LayoutBuilder(builder: (context, constraints) {
-      return Container(
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          color: itemBgColor,
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(3, 3, 3, 0),
-              child: AspectRatio(
-                aspectRatio: 170 / 102,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
-                  child: Image.network(
-                    'https://picsum.photos/340/204',
-                    fit: BoxFit.cover,
-                    errorBuilder: (ctx, err, stack) => Container(color: Colors.grey[300]),
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(6, 4, 6, 6),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      '充气涂鸦充气长颈鹿',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF333333),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          '¥15.4',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: theme.primaryColor,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Expanded(
-                          child: Text(
-                            '[出厂货号]',
-                            style: TextStyle(fontSize: 10, color: Color(0xFF999999)),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Expanded(
-                          child: Text(
-                            'XXX玩具厂',
-                            style: TextStyle(fontSize: 10, color: Color(0xFF999999)),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: theme.primaryColor,
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: Alignment.center,
-                          child: const Icon(Icons.add, color: Colors.white, size: 16),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
+    setState(() {
+      _loadingLatestProducts = true;
+      _errorLatestProducts = null;
     });
+
+    try {
+      final res = await FactoryService.querySupplierDetailProductPage(
+        pageNo: 1,
+        pageSize: 20,
+        searchType: 1, // 1: 最新产品（约定值，如有不同请调整）
+        supplierNumber: supplierNumber,
+      );
+      if (!mounted) return;
+      if (res.success && res.data != null) {
+        setState(() {
+          _latestProducts = res.data!.rows;
+          _loadingLatestProducts = false;
+        });
+      } else {
+        setState(() {
+          _loadingLatestProducts = false;
+          _errorLatestProducts = res.message;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loadingLatestProducts = false;
+        _errorLatestProducts = e.toString();
+      });
+    }
+  }
+
+  Future<void> _loadRecommendProducts() async {
+    final supplierNumber = _supplierNumber;
+    if (supplierNumber == null || supplierNumber.isEmpty) {
+      setState(() {
+        _loadingRecommendProducts = false;
+        _recommendProducts = [];
+      });
+      return;
+    }
+
+    setState(() {
+      _loadingRecommendProducts = true;
+      _errorRecommendProducts = null;
+    });
+
+    try {
+      final res = await FactoryService.querySupplierDetailProductPage(
+        pageNo: 1,
+        pageSize: 20,
+        searchType: 2, // 2: 推荐产品（约定值，如有不同请调整）
+        supplierNumber: supplierNumber,
+      );
+      if (!mounted) return;
+      if (res.success && res.data != null) {
+        setState(() {
+          _recommendProducts = res.data!.rows;
+          _loadingRecommendProducts = false;
+        });
+      } else {
+        setState(() {
+          _loadingRecommendProducts = false;
+          _errorRecommendProducts = res.message;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loadingRecommendProducts = false;
+        _errorRecommendProducts = e.toString();
+      });
+    }
   }
 }
 

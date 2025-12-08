@@ -371,26 +371,26 @@ class _FactoryPageState extends State<FactoryPage> {
           topRight: Radius.circular(8),
         ),
       ),
-      child: Row(
-        children: [
-          const Text(
-            '全部厂商',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _goToFactoryListPage(FactoryListType.all),
+        child: Row(
+          children: const [
+            Text(
+              '全部厂商',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: () => _goToFactoryListPage(FactoryListType.all),
-            behavior: HitTestBehavior.opaque,
-            child: const Padding(
+            Spacer(),
+            Padding(
               padding: EdgeInsets.all(4),
               child: Icon(Icons.chevron_right, color: Colors.white, size: 20),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -414,23 +414,29 @@ class _FactoryPageState extends State<FactoryPage> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
-            child: Row(
-              children: [
-                Icon(Iconfont.xinpin, size: 18, color: theme.primaryColor),
-                const SizedBox(width: 6),
-                const Text('最新入驻', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                const Spacer(),
-                GestureDetector(
-                  onTap: () => _goToFactoryListPage(FactoryListType.latest),
+          child: Row(
+            children: [
+              Icon(Iconfont.xinpin, size: 18, color: theme.primaryColor),
+              const SizedBox(width: 6),
+              Expanded(
+                child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  child: const Padding(
-                    padding: EdgeInsets.all(4),
-                    child: Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                  onTap: () => _goToFactoryListPage(FactoryListType.latest),
+                  child: Row(
+                    children: const [
+                      Text('最新入驻', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      Spacer(),
+                      Padding(
+                        padding: EdgeInsets.all(4),
+                        child: Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+        ),
           SizedBox(
             height: 90,
             child: _loadingLatest
@@ -504,24 +510,30 @@ class _FactoryPageState extends State<FactoryPage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(10),
-            child: Row(
-              children: [
-                Icon(Iconfont.tuijian, size: 18, color: theme.primaryColor),
-                const SizedBox(width: 6),
-                const Text('推荐厂商',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                const Spacer(),
-                GestureDetector(
-                  onTap: () => _goToFactoryListPage(FactoryListType.recommend),
+          child: Row(
+            children: [
+              Icon(Iconfont.tuijian, size: 18, color: theme.primaryColor),
+              const SizedBox(width: 6),
+              Expanded(
+                child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  child: const Padding(
-                    padding: EdgeInsets.all(4),
-                    child: Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                  onTap: () => _goToFactoryListPage(FactoryListType.recommend),
+                  child: Row(
+                    children: const [
+                      Text('推荐厂商',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      Spacer(),
+                      Padding(
+                        padding: EdgeInsets.all(4),
+                        child: Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+        ),
           if (_loadingRecommend)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 20),

@@ -1,6 +1,8 @@
 import 'package:flutter_wanhaoniu/src/core/network/api_response.dart';
 import 'package:flutter_wanhaoniu/src/core/network/http_manager.dart';
 
+import '../../../shared/models/paginated_response.dart';
+import '../../../shared/models/product.dart';
 import '../../../shared/models/source_supplier.dart';
 
 const _baseUrl = 'http://192.168.110.150:8221';
@@ -111,6 +113,41 @@ class FactoryService {
       baseUrl: _baseUrl,
       data: {'id': id},
       fromJsonT: (data) => SupplierContact.fromJson(data),
+    );
+  }
+
+  /// 源头工厂 - 工厂详情产品（所有/最新/推荐等）
+  static Future<ApiResponse<PaginatedResponse<ProductItem>>> querySupplierDetailProductPage({
+    required int pageNo,
+    required int pageSize,
+    String? sortField,
+    String? sortOrder,
+    String? keywords,
+    String? clNu,
+    int? searchType,
+    required String supplierNumber,
+    List<SupplierConditional>? conditionals,
+  }) {
+    final Map<String, dynamic> body = {
+      'pageNo': pageNo,
+      'pageSize': pageSize,
+      if (sortField != null) 'sortField': sortField,
+      if (sortOrder != null) 'sortOrder': sortOrder,
+      if (keywords != null) 'keywords': keywords,
+      if (clNu != null) 'cl_Nu': clNu,
+      if (searchType != null) 'searchType': searchType,
+      'supplierNumber': supplierNumber,
+      'conditionals': conditionals?.map((e) => e.toJson()).toList() ?? [],
+    };
+
+    return HttpManager().post(
+      '/front/ProductBasic/QuerySupplierDetailProductPage',
+      baseUrl: _baseUrl,
+      data: body,
+      fromJsonT: (data) => PaginatedResponse<ProductItem>.fromJson(
+        data,
+        (json) => ProductItem.fromJson(json),
+      ),
     );
   }
 }
