@@ -6,6 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/constants/layout_constants.dart';
 import '../../../core/network/modules/factory_service.dart';
 import '../../../shared/models/source_supplier.dart';
+import 'widgets/contact_dialog.dart';
 
 class FactoryNamePage extends StatefulWidget {
   const FactoryNamePage({super.key, this.supplier, this.detail});
@@ -252,7 +253,7 @@ class _FactoryNamePageState extends State<FactoryNamePage> {
                                   color: Colors.black87,
                                 ),
                                 dataModuleStyle: const QrDataModuleStyle(
-                                  dataModuleShape: QrDataModuleShape.square,
+                                  dataModuleShape: QrDataModuleShape.square, 
                                   color: Colors.black87,
                                 ),
                               ),

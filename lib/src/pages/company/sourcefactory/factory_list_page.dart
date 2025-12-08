@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../../../core/constants/layout_constants.dart';
 import '../../../core/network/modules/factory_service.dart';
@@ -18,51 +19,122 @@ class FactoryListPage extends StatefulWidget {
 }
 
 class _FactoryListPageState extends State<FactoryListPage> {
+  static const int _pageSize = 20;
+
   bool _loading = true;
   String? _error;
   List<SourceSupplier> _suppliers = [];
+  int _page = 1;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+  final RefreshController _refreshController = RefreshController(initialRefresh: false);
 
   @override
   void initState() {
     super.initState();
-    _fetch();
+    _fetch(page: 1);
   }
 
-  Future<void> _fetch() async {
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
+  }
+
+  Future<bool> _fetch({required int page, bool append = false}) async {
+    if (!append) {
+      setState(() {
+        if (page == 1) {
+          _loading = true;
+          _error = null;
+        }
+      });
+    }
+
+    List<SourceSupplier> rows = [];
+
     try {
       switch (widget.type) {
         case FactoryListType.recommend:
-          final res = await FactoryService.queryRecommendSupplierPage(pageNo: 1, pageSize: 20);
+          final res = await FactoryService.queryRecommendSupplierPage(pageNo: page, pageSize: _pageSize);
           if (res.success && res.data != null) {
-            _suppliers = res.data!.rows.map((e) => SourceSupplier.fromRecommend(e)).toList();
+            rows = res.data!.rows.map((e) => SourceSupplier.fromRecommend(e)).toList();
           } else {
             _error = res.message;
+            throw Exception(res.message);
           }
           break;
         case FactoryListType.latest:
-          final res = await FactoryService.queryLatestSupplierPage(pageNo: 1, pageSize: 20);
+          final res = await FactoryService.queryLatestSupplierPage(pageNo: page, pageSize: _pageSize);
           if (res.success && res.data != null) {
-            _suppliers = res.data!.rows;
+            rows = res.data!.rows;
           } else {
             _error = res.message;
+            throw Exception(res.message);
           }
           break;
         case FactoryListType.all:
-          final res = await FactoryService.querySourceSupplierPage(pageNo: 1, pageSize: 20, keywords: '');
+          final res = await FactoryService.querySourceSupplierPage(pageNo: page, pageSize: _pageSize, keywords: '');
           if (res.success && res.data != null) {
-            _suppliers = res.data!.rows;
+            rows = res.data!.rows;
           } else {
             _error = res.message;
+            throw Exception(res.message);
           }
       }
+
+      if (!mounted) return false;
+      setState(() {
+        if (append) {
+          _suppliers.addAll(rows);
+        } else {
+          _suppliers = rows;
+        }
+        _page = page;
+        _hasMore = rows.length == _pageSize;
+        _loading = false;
+        _error = null;
+      });
+      return true;
     } catch (e) {
-      _error = e.toString();
+      if (!mounted) return false;
+      setState(() {
+        _loading = false;
+        _error = e.toString();
+      });
+      return false;
+    }
+  }
+
+  Future<void> _onRefresh() async {
+    final ok = await _fetch(page: 1, append: false);
+    if (ok) {
+      _refreshController.refreshCompleted();
+      _refreshController.resetNoData();
+    } else {
+      _refreshController.refreshFailed();
+    }
+  }
+
+  Future<void> _onLoading() async {
+    if (_isLoadingMore) return;
+    if (!_hasMore) {
+      _refreshController.loadNoData();
+      return;
     }
 
-    if (!mounted) return;
-    setState(() {
-      _loading = false;
-    });
+    _isLoadingMore = true;
+    final ok = await _fetch(page: _page + 1, append: true);
+    if (ok) {
+      if (_hasMore) {
+        _refreshController.loadComplete();
+      } else {
+        _refreshController.loadNoData();
+      }
+    } else {
+      _refreshController.loadFailed();
+    }
+    _isLoadingMore = false;
   }
 
   String get _title {
@@ -113,15 +185,22 @@ class _FactoryListPageState extends State<FactoryListPage> {
       return const Center(child: Text('暂无数据'));
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(LayoutConstants.pagePadding),
-      itemCount: _suppliers.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: FactoryProductCard(supplier: _suppliers[index]),
-        );
-      },
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullDown: true,
+      enablePullUp: true,
+      onRefresh: _onRefresh,
+      onLoading: _onLoading,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(LayoutConstants.pagePadding),
+        itemCount: _suppliers.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: FactoryProductCard(supplier: _suppliers[index]),
+          );
+        },
+      ),
     );
   }
 }

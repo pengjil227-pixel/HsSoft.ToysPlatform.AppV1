@@ -3,15 +3,15 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../../shared/models/source_supplier.dart';
 
-/// 通用的工厂联系方式弹层
+/// 通用的工厂联系方式弹层，样式与 FactoryName 页面一致。
 void showFactoryContactDialog(
-    BuildContext context, {
-      required Color primaryColor,
-      SupplierDetail? detail,
-      SupplierContact? contact,
-      bool loading = false,
-      String? error,
-    }) {
+  BuildContext context, {
+  required Color primaryColor,
+  SupplierDetail? detail,
+  SupplierContact? contact,
+  bool loading = false,
+  String? error,
+}) {
   showDialog(
     context: context,
     barrierDismissible: true,
@@ -19,7 +19,7 @@ void showFactoryContactDialog(
     builder: (_) {
       return Center(
         child: Material(
-          color: Colors.transparent,
+          color: Colors.transparent, // Ensure Material is transparent for correct rendering
           child: Stack(
             clipBehavior: Clip.none,
             children: [
@@ -33,7 +33,6 @@ void showFactoryContactDialog(
                       child: SizedBox(height: 120, width: 200, child: Center(child: CircularProgressIndicator())),
                     );
                   }
-
                   if (error != null) {
                     return Dialog(
                       child: SizedBox(
@@ -54,8 +53,9 @@ void showFactoryContactDialog(
                     );
                   }
 
-                  final displayName = contact?.supplierName ?? detail?.companyName ?? 'XXX厂商';
-                  final qrData = contact?.phoneNumber ?? contact?.supplierNumber ?? detail?.supplierNumber ?? 'factory-contact';
+                  final displayName = contact?.supplierName ?? detail?.companyName ?? '厂商';
+                  final qrData = contact?.phoneNumber ?? contact?.supplierNumber ?? detail?.supplierNumber ?? 'contact';
+
                   return Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -103,7 +103,7 @@ void showFactoryContactDialog(
                             ),
                             const SizedBox(height: 8),
                             const Text(
-                              '长按二维码，即刻联系',
+                              '长按扫码，即刻联系',
                               style: TextStyle(fontSize: 12, color: Color(0xFF999999)),
                             ),
                             const SizedBox(height: 14),
@@ -117,7 +117,19 @@ void showFactoryContactDialog(
                                 ),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: _ContactLines(contact: contact),
+                              child: SizedBox(
+                                width: 200,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _ContactLine(label: '联系人：', value: contact?.linkMan ?? '--'),
+                                    const SizedBox(height: 6),
+                                    _ContactLine(label: '联系电话：', value: contact?.telePhoneNumber ?? '--'),
+                                    const SizedBox(height: 6),
+                                    _ContactLine(label: '联系手机：', value: contact?.phoneNumber ?? '--'),
+                                  ],
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -125,10 +137,10 @@ void showFactoryContactDialog(
                       Positioned(
                         top: -avatarSize / 2,
                         left: (cardWidth - avatarSize) / 2,
-                        child: CircleAvatar(
+                        child: const CircleAvatar(
                           radius: avatarSize / 2,
-                          backgroundColor: const Color(0xFFF3F3F3),
-                          backgroundImage: const AssetImage('assets/images/avatar@2x.png'),
+                          backgroundColor: Color(0xFFF3F3F3),
+                          backgroundImage: AssetImage('assets/images/avatar@2x.png'),
                         ),
                       ),
                     ],
@@ -143,37 +155,6 @@ void showFactoryContactDialog(
   );
 }
 
-class _ContactLines extends StatelessWidget {
-  const _ContactLines({this.contact});
-
-  final SupplierContact? contact;
-
-  @override
-  Widget build(BuildContext context) {
-    final rows = <Widget>[];
-
-    void addLine(String label, String? value) {
-      if (value == null || value.isEmpty) return;
-      if (rows.isNotEmpty) rows.add(const SizedBox(height: 6));
-      rows.add(_ContactLine(label: label, value: value));
-    }
-
-    addLine('联系人：', contact?.linkMan);
-    addLine('联系电话：', contact?.telePhoneNumber);
-    addLine('联系手机：', contact?.phoneNumber);
-
-    if (rows.isEmpty) {
-      rows.add(const _ContactLine(label: '暂无联系方式', value: ''));
-    }
-
-    // Use CrossAxisAlignment.start to align the rows to the left
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: rows,
-    );
-  }
-}
-
 class _ContactLine extends StatelessWidget {
   const _ContactLine({required this.label, required this.value});
 
@@ -182,31 +163,13 @@ class _ContactLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min, // Ensures the Row is only as wide as its children.
-      children: [
-        // Align label text to the left (first column)
-        SizedBox(
-          width: 100, // Adjust width to fit labels
-          child: Align(
-            alignment: Alignment.centerLeft, // Align label to the left
-            child: Text(
-              label,
-              textAlign: TextAlign.left, // Align labels for the left side
-              style: const TextStyle(fontSize: 14, color: Colors.white, height: 1.2),
-            ),
-          ),
-        ),
-        const SizedBox(width: 5), // Small gap between label and value
-        // The corresponding value (second column)
-        Expanded(
-          child: Text(
-            value,
-            textAlign: TextAlign.right, // Right-align the value for each row
-            style: const TextStyle(fontSize: 14, color: Colors.white, height: 1.2),
-          ),
-        ),
-      ],
+    return Text(
+      '$label$value',
+      style: const TextStyle(
+        fontSize: 14,
+        color: Color(0xFF333333),
+        height: 1.2,
+      ),
     );
   }
 }

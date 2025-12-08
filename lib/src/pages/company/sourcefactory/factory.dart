@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconfont/iconfont.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/layout_constants.dart';
@@ -21,108 +22,232 @@ class FactoryPage extends StatefulWidget {
 
 class _FactoryPageState extends State<FactoryPage> {
   final PageController _newArrivalsController = PageController();
+  final RefreshController _refreshController = RefreshController(initialRefresh: false);
   int _newArrivalsIndex = 0;
 
-  List<SourceSupplier> _suppliers = [];
-  List<SourceSupplier> _latestSuppliers = [];
-  List<SourceSupplier> _recommendSuppliers = [];
-  bool _loadingAll = true;
+  // 最新入驻
+  static const int _latestPageSize = 12;
+  int _latestPage = 1;
+  bool _hasMoreLatest = true;
   bool _loadingLatest = true;
-  bool _loadingRecommend = true;
-  String? _errorAll;
+  List<SourceSupplier> _latestSuppliers = [];
   String? _errorLatest;
+
+  // 推荐厂商
+  static const int _recommendPageSize = 10;
+  int _recommendPage = 1;
+  bool _hasMoreRecommend = true;
+  bool _loadingRecommend = true;
+  List<SourceSupplier> _recommendSuppliers = [];
   String? _errorRecommend;
+
+  // 全部厂商
+  static const int _allPageSize = 20;
+  int _allPage = 1;
+  bool _hasMoreAll = true;
+  bool _loadingAll = true;
+  List<SourceSupplier> _suppliers = [];
+  String? _errorAll;
+
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchSuppliers();
-    _fetchLatest();
-    _fetchRecommend();
+    _initLoad();
   }
 
-  Future<void> _fetchSuppliers() async {
+  Future<void> _initLoad() async {
+    await Future.wait([
+      _loadLatest(page: 1),
+      _loadRecommend(page: 1),
+      _loadAllSuppliers(page: 1),
+    ]);
+  }
+
+  Future<bool> _loadAllSuppliers({required int page, bool append = false}) async {
+    if (!append) {
+      setState(() {
+        _loadingAll = true;
+        _errorAll = null;
+      });
+    }
+
     try {
       final res = await FactoryService.querySourceSupplierPage(
-        pageNo: 1,
-        pageSize: 20,
+        pageNo: page,
+        pageSize: _allPageSize,
         keywords: '',
       );
-      if (!mounted) return;
+      if (!mounted) return false;
       if (res.success && res.data != null) {
         setState(() {
-          _suppliers = res.data!.rows;
+          final rows = res.data!.rows;
+          if (append) {
+            _suppliers.addAll(rows);
+          } else {
+            _suppliers = rows;
+          }
+          _allPage = page;
+          _hasMoreAll = rows.length == _allPageSize;
           _loadingAll = false;
           _errorAll = null;
         });
+        return true;
       } else {
         setState(() {
           _loadingAll = false;
           _errorAll = res.message;
         });
+        return false;
       }
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) return false;
       setState(() {
         _loadingAll = false;
         _errorAll = e.toString();
       });
+      return false;
     }
   }
 
-  Future<void> _fetchLatest() async {
+  Future<bool> _loadLatest({required int page, bool append = false}) async {
+    if (!append) {
+      setState(() {
+        _loadingLatest = true;
+        _errorLatest = null;
+      });
+    }
+
     try {
       final res = await FactoryService.queryLatestSupplierPage(
-        pageNo: 1,
-        pageSize: 12,
+        pageNo: page,
+        pageSize: _latestPageSize,
       );
-      if (!mounted) return;
+      if (!mounted) return false;
       if (res.success && res.data != null) {
         setState(() {
-          _latestSuppliers = res.data!.rows;
+          final rows = res.data!.rows;
+          if (append) {
+            _latestSuppliers.addAll(rows);
+          } else {
+            _latestSuppliers = rows;
+          }
+          _latestPage = page;
+          _hasMoreLatest = rows.length == _latestPageSize;
           _loadingLatest = false;
           _errorLatest = null;
         });
+        return true;
       } else {
         setState(() {
           _loadingLatest = false;
           _errorLatest = res.message;
         });
+        return false;
       }
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) return false;
       setState(() {
         _loadingLatest = false;
         _errorLatest = e.toString();
       });
+      return false;
     }
   }
 
-  Future<void> _fetchRecommend() async {
+  Future<bool> _loadRecommend({required int page, bool append = false}) async {
+    if (!append) {
+      setState(() {
+        _loadingRecommend = true;
+        _errorRecommend = null;
+      });
+    }
+
     try {
       final res = await FactoryService.queryRecommendSupplierPage(
-        pageNo: 1,
-        pageSize: 10,
+        pageNo: page,
+        pageSize: _recommendPageSize,
       );
-      if (!mounted) return;
+      if (!mounted) return false;
       if (res.success && res.data != null) {
         setState(() {
-          _recommendSuppliers = res.data!.rows.map((e) => SourceSupplier.fromRecommend(e)).toList();
+          final rows = res.data!.rows.map((e) => SourceSupplier.fromRecommend(e)).toList();
+          if (append) {
+            _recommendSuppliers.addAll(rows);
+          } else {
+            _recommendSuppliers = rows;
+          }
+          _recommendPage = page;
+          _hasMoreRecommend = rows.length == _recommendPageSize;
           _loadingRecommend = false;
           _errorRecommend = null;
         });
+        return true;
       } else {
         setState(() {
           _loadingRecommend = false;
           _errorRecommend = res.message;
         });
+        return false;
       }
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) return false;
       setState(() {
         _loadingRecommend = false;
         _errorRecommend = e.toString();
       });
+      return false;
+    }
+  }
+
+  Future<void> _onRefresh() async {
+    try {
+      final results = await Future.wait([
+        _loadLatest(page: 1),
+        _loadRecommend(page: 1),
+        _loadAllSuppliers(page: 1),
+      ]);
+
+      if (results.any((e) => e == false)) {
+        _refreshController.refreshFailed();
+      } else {
+        _refreshController.refreshCompleted();
+        _refreshController.resetNoData();
+      }
+    } catch (_) {
+      _refreshController.refreshFailed();
+    }
+  }
+
+  Future<void> _onLoading() async {
+    if (_isLoadingMore) return;
+    if (!mounted) return;
+
+    if (!_hasMoreAll && !_hasMoreLatest && !_hasMoreRecommend) {
+      _refreshController.loadNoData();
+      return;
+    }
+
+    _isLoadingMore = true;
+    try {
+      final results = await Future.wait([
+        _hasMoreLatest ? _loadLatest(page: _latestPage + 1, append: true) : Future.value(true),
+        _hasMoreRecommend ? _loadRecommend(page: _recommendPage + 1, append: true) : Future.value(true),
+        _hasMoreAll ? _loadAllSuppliers(page: _allPage + 1, append: true) : Future.value(true),
+      ]);
+
+      if (results.any((e) => e == false)) {
+        _refreshController.loadFailed();
+      } else if (!_hasMoreAll && !_hasMoreLatest && !_hasMoreRecommend) {
+        _refreshController.loadNoData();
+      } else {
+        _refreshController.loadComplete();
+      }
+    } catch (_) {
+      _refreshController.loadFailed();
+    } finally {
+      _isLoadingMore = false;
     }
   }
 
@@ -133,6 +258,7 @@ class _FactoryPageState extends State<FactoryPage> {
   @override
   void dispose() {
     _newArrivalsController.dispose();
+    _refreshController.dispose();
     super.dispose();
   }
 
@@ -140,78 +266,85 @@ class _FactoryPageState extends State<FactoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F4F4),
-      body: CustomScrollView(
-        slivers: [
-          // --- 0. 顶部轮播图 ---
-          SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.only(
-                  left: LayoutConstants.pagePadding,
-                  right: LayoutConstants.pagePadding,
-                  top: 10,
-                  bottom: 10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SizedBox(
-                height: 160,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(6.0),
-                  child: Selector<HomeInfos, List<SalesAdsList>?>(
-                    selector: (_, model) => model.salesAdsList,
-                    builder: (context, value, _) {
-                      if (value == null || value.isEmpty) {
+      body: SmartRefresher(
+        controller: _refreshController,
+        enablePullDown: true,
+        enablePullUp: true,
+        onRefresh: _onRefresh,
+        onLoading: _onLoading,
+        child: CustomScrollView(
+          slivers: [
+            // --- 0. 顶部轮播图 ---
+            SliverToBoxAdapter(
+              child: Container(
+                margin: const EdgeInsets.only(
+                    left: LayoutConstants.pagePadding,
+                    right: LayoutConstants.pagePadding,
+                    top: 10,
+                    bottom: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SizedBox(
+                  height: 160,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(6.0),
+                    child: Selector<HomeInfos, List<SalesAdsList>?>(
+                      selector: (_, model) => model.salesAdsList,
+                      builder: (context, value, _) {
+                        if (value == null || value.isEmpty) {
+                          return CustomSwiper(
+                            itemCount: 3,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Image.network(
+                                'https://picsum.photos/300/160?i=$index',
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Image.asset('assets/images/logo.png', fit: BoxFit.cover),
+                              );
+                            },
+                          );
+                        }
                         return CustomSwiper(
-                          itemCount: 3,
+                          itemCount: value.length,
                           itemBuilder: (BuildContext context, int index) {
                             return Image.network(
-                              'https://picsum.photos/300/160?i=$index',
+                              value[index].imgUrl,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>
                                   Image.asset('assets/images/logo.png', fit: BoxFit.cover),
                             );
                           },
                         );
-                      }
-                      return CustomSwiper(
-                        itemCount: value.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Image.network(
-                            value[index].imgUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Image.asset('assets/images/logo.png', fit: BoxFit.cover),
-                          );
-                        },
-                      );
-                    },
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
 
-          // --- 1. 最新入驻 ---
-          SliverToBoxAdapter(
-            child: _buildNewArrivals(),
-          ),
+            // --- 1. 最新入驻 ---
+            SliverToBoxAdapter(
+              child: _buildNewArrivals(),
+            ),
 
-          // --- 2. 推荐厂商 ---
-          SliverToBoxAdapter(
-            child: _buildRecommendedFactory(),
-          ),
+            // --- 2. 推荐厂商 ---
+            SliverToBoxAdapter(
+              child: _buildRecommendedFactory(),
+            ),
 
-          // --- 3. 全部厂商标题栏 ---
-          SliverToBoxAdapter(
-            child: _buildAllFactoriesHeader(),
-          ),
+            // --- 3. 全部厂商标题栏 ---
+            SliverToBoxAdapter(
+              child: _buildAllFactoriesHeader(),
+            ),
 
-          // --- 4. 全部厂商列表 ---
-          _buildSupplierList(),
+            // --- 4. 全部厂商列表 ---
+            _buildSupplierList(),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 50)),
-        ],
+            const SliverToBoxAdapter(child: SizedBox(height: 50)),
+          ],
+        ),
       ),
     );
   }
@@ -363,7 +496,7 @@ class _FactoryPageState extends State<FactoryPage> {
           left: LayoutConstants.pagePadding,
           right: LayoutConstants.pagePadding,
           bottom: 10),
-    decoration: BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
       ),
@@ -482,47 +615,47 @@ class _FactoryPageState extends State<FactoryPage> {
             Container(
               width: 40,
               height: 40,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              clipBehavior: Clip.hardEdge,
+              child: supplier.supplierLogo?.isNotEmpty == true
+                  ? Image.network(
+                      supplier.supplierLogo!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Image.asset('assets/images/logo.png', fit: BoxFit.contain),
+                    )
+                  : Image.asset(
+                      'assets/images/logo.png',
+                      fit: BoxFit.contain,
+                    ),
             ),
-            clipBehavior: Clip.hardEdge,
-            child: supplier.supplierLogo?.isNotEmpty == true
-                ? Image.network(
-                    supplier.supplierLogo!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Image.asset('assets/images/logo.png', fit: BoxFit.contain),
-                  )
-                : Image.asset(
-                    'assets/images/logo.png',
-                    fit: BoxFit.contain,
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    supplier.supplierName ?? '厂商名称',
+                    style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF333333),
+                        fontWeight: FontWeight.w500),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  supplier.supplierName ?? '厂商名称',
-                  style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF333333),
-                      fontWeight: FontWeight.w500),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  supplier.industryNames ?? '主营：--',
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF999999)),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+                  const SizedBox(height: 2),
+                  Text(
+                    supplier.industryNames ?? '主营：--',
+                    style: const TextStyle(fontSize: 11, color: Color(0xFF999999)),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
