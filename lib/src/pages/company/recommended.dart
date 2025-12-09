@@ -7,15 +7,16 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../../core/constants/layout_constants.dart';
+import '../../core/network/modules/company.dart';
 import '../../core/providers/home_infos.dart';
 import '../../shared/models/company_origin.dart';
 import '../../shared/models/exhibition.dart';
 import '../../shared/models/paginated_response.dart';
 import '../../shared/models/product.dart';
 import '../../shared/models/sales_ads_list.dart';
-import '../../widgets/custom_spinner.dart';
+import '../../widgets/custom_smart_refresher.dart';
 import '../../widgets/custom_swiper.dart';
-import '../../widgets/goods_item.dart';
+import '../../widgets/products_view.dart';
 
 class RecommendedPage extends StatefulWidget {
   const RecommendedPage({super.key});
@@ -27,6 +28,16 @@ class RecommendedPage extends StatefulWidget {
 class _RecommendedPageState extends State<RecommendedPage> {
   final RefreshController _refreshController = RefreshController();
 
+  late final SmartRefresherParameter _smartRefresherParameter;
+
+  @override
+  void initState() {
+    super.initState();
+    _smartRefresherParameter = SmartRefresherParameter(
+      loadList: (int page) => CompanyService.getRecomendProduct(page),
+    );
+  }
+
   Future<void> _onRefresh() async {
     await Future.wait([
       context.read<HomeInfos>().updateHomeInfos(),
@@ -36,15 +47,11 @@ class _RecommendedPageState extends State<RecommendedPage> {
   }
 
   Future<void> _onLoading() async {
-    try {
-      bool canLoad = await context.read<HomeInfos>().loadMoreRecomendProduct();
-      if (canLoad) {
-        _refreshController.loadComplete();
-      } else {
-        _refreshController.loadNoData();
-      }
-    } catch (err) {
-      _refreshController.loadFailed();
+    final bool? hasMore = await _smartRefresherParameter.loadmore?.call();
+    if (hasMore == false) {
+      _refreshController.loadNoData();
+    } else {
+      _refreshController.loadComplete();
     }
   }
 
@@ -93,38 +100,8 @@ class _RecommendedPageState extends State<RecommendedPage> {
     return SmartRefresher(
       enablePullDown: true,
       enablePullUp: true,
-      header: CustomHeader(
-        completeDuration: Duration.zero,
-        height: 40,
-        builder: (context, mode) {
-          return Align(
-            child: CustomSpinner(),
-          );
-        },
-      ),
-      footer: CustomFooter(
-        height: 40,
-        builder: (context, mode) {
-          if (mode == LoadStatus.noMore) {
-            return Align(
-                child: Text(
-              '没有更多了',
-              style: TextStyle(color: Colors.grey, fontSize: 12),
-            ));
-          } else if (mode == LoadStatus.failed) {
-            return Align(
-                child: Text(
-              '加载失败',
-              style: TextStyle(color: Colors.grey, fontSize: 12),
-            ));
-          }
-          return Align(
-              child: Text(
-            '正在加载中...',
-            style: TextStyle(color: Colors.grey, fontSize: 12),
-          ));
-        },
-      ),
+      header: SmartRefresherHeader(),
+      footer: SmartRefresherFooter(),
       controller: _refreshController,
       onRefresh: _onRefresh,
       onLoading: _onLoading,
@@ -319,49 +296,25 @@ class _RecommendedPageState extends State<RecommendedPage> {
                   imageUrl: 'https://testerp-1303814652.cos.ap-guangzhou.myqcloud.com/Uploads/ProImg/Custom/2063/17642057706011.jpg',
                 )),
           ),
-          SliverToBoxAdapter(
-            child: Selector<HomeInfos, PaginatedResponse<ProductItem>?>(
-              selector: (_, model) => model.recomendProduct,
-              builder: (context, PaginatedResponse<ProductItem>? value, __) {
-                if (value == null || value.rows.isEmpty) return SizedBox.shrink();
-                return SizedBox(
-                  height: 34,
-                  child: Align(
-                    child: Text('推荐产品', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ),
-                );
-              },
-            ),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.fromLTRB(LayoutConstants.pagePadding, 0, LayoutConstants.pagePadding, LayoutConstants.pagePadding),
-            sliver: Consumer<HomeInfos>(
-              builder: (context, HomeInfos value, __) {
-                if (value.recomendProduct == null) return SliverPadding(padding: EdgeInsets.zero);
-                return ProductsBuilder(
-                  item: value.recomendProduct!,
-                  loadMore: () {
-                    context.read<HomeInfos>().loadMoreRecomendProduct();
-                  },
-                );
-              },
-            ),
+          // SliverToBoxAdapter(
+          //   child: Selector<HomeInfos, PaginatedResponse<ProductItem>?>(
+          //     selector: (_, model) => model.recomendProduct,
+          //     builder: (context, PaginatedResponse<ProductItem>? value, __) {
+          //       if (value == null || value.rows.isEmpty) return SizedBox.shrink();
+          //       return SizedBox(
+          //         height: 34,
+          //         child: Align(
+          //           child: Text('推荐产品', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // ),
+          ProductsView(
+            parameter: _smartRefresherParameter,
           ),
         ],
       ),
     );
-    // return Container(
-    //   color: Colors.amber,
-    //   child: ListView.builder(
-    //     itemCount: 50,
-    //     itemBuilder: (context, index) {
-    //       return Container(
-    //         height: 50,
-    //         margin: EdgeInsets.all(10),
-    //         color: Colors.greenAccent,
-    //       );
-    //     },
-    //   ),
-    // );
   }
 }

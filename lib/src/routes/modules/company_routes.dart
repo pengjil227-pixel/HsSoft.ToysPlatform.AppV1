@@ -17,6 +17,7 @@ import '../../pages/company/my/company_info_page.dart';
 import '../../pages/company/my/account_manage_page.dart';
 import '../../pages/company/my/online_service_page.dart';
 import '../../pages/company/my/product_compare_page.dart';
+import '../../widgets/goods_item.dart';
 
 class CompanyRoutes {
   static List<GoRoute> get routes {
@@ -81,12 +82,12 @@ class CompanyRoutes {
             ],
           ),
           GoRoute(
-            path: 'goodsDetail/:index',
+            path: 'goodsDetail',
             name: 'goodsDetail',
             builder: (context, state) {
-              final int index = int.parse(state.pathParameters['index']!);
+              ProductsParameters parameters = state.extra as ProductsParameters;
               return GoodsDetail(
-                currentPage: index,
+                parameters: parameters,
               );
             },
           ),

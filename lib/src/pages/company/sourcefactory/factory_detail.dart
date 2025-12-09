@@ -226,14 +226,14 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
                     itemBuilder: (context, index) {
                       final item = _recommendProducts[index];
                       void openDetail() {
-                        final goodsDetailInfo = context.read<GoodsDetailInfo>();
-                        goodsDetailInfo.products = _recommendProducts;
-                        goodsDetailInfo.currentIndex = index;
+                        // final goodsDetailInfo = context.read<GoodsDetailInfo>();
+                        // goodsDetailInfo.products = _recommendProducts;
+                        // goodsDetailInfo.currentIndex = index;
 
-                        context.pushNamed(
-                          'goodsDetail',
-                          pathParameters: {'index': index.toString()},
-                        );
+                        // context.pushNamed(
+                        //   'goodsDetail',
+                        //   pathParameters: {'index': index.toString()},
+                        // );
                       }
                       return GestureDetector(
                         onTap: openDetail,
@@ -487,10 +487,10 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
 
   Widget _buildGoodsItemCard(ProductItem item, int indexInList) {
     void openDetail() {
-      final goodsDetailInfo = context.read<GoodsDetailInfo>();
-      goodsDetailInfo.products = _latestProducts;
-      goodsDetailInfo.currentIndex = indexInList;
-      context.pushNamed('goodsDetail', pathParameters: {'index': indexInList.toString()});
+      // final goodsDetailInfo = context.read<GoodsDetailInfo>();
+      // goodsDetailInfo.products = _latestProducts;
+      // goodsDetailInfo.currentIndex = indexInList;
+      // context.pushNamed('goodsDetail', pathParameters: {'index': indexInList.toString()});
     }
 
     return GestureDetector(

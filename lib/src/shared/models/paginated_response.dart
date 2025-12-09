@@ -7,10 +7,10 @@ class PaginatedResponse<T> {
     required this.rows,
   });
 
-  final int pageNo;
-  final int pageSize;
-  final int totalPage;
-  final int totalRows;
+  late int pageNo;
+  late int pageSize;
+  late int totalPage;
+  late int totalRows;
   final List<T> rows;
 
   factory PaginatedResponse.fromJson(

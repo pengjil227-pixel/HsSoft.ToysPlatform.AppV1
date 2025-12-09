@@ -185,9 +185,7 @@ class _SearchPageState extends State<SearchPage> {
                       if (value == null) return SliverPadding(padding: EdgeInsets.zero);
                       return ProductsBuilder(
                         item: value,
-                        loadMore: () {
-                          
-                        },
+                        loadmore: () {},
                       );
                     },
                   ),

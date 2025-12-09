@@ -59,34 +59,6 @@ class HomeInfos extends ChangeNotifier {
     _updateCompanyOrigin(response.data!);
   }
 
-  PaginatedResponse<ProductItem>? _recomendProduct;
-  PaginatedResponse<ProductItem>? get recomendProduct => _recomendProduct;
-  void _updateRecomendProduct(PaginatedResponse<ProductItem>? value) {
-    _recomendProduct = value;
-    notifyListeners();
-  }
-
-  Future<void> _getRecomendProduct() async {
-    final response = await CompanyService.getRecomendProduct({
-      "pageNo": 1,
-    });
-    _updateRecomendProduct(response.data!);
-  }
-
-  Future<bool> loadMoreRecomendProduct() async {
-    if (_recomendProduct != null && _recomendProduct!.totalPage == _recomendProduct!.pageNo) {
-      return false;
-    }
-    final response = await CompanyService.getRecomendProduct({
-      "pageNo": _recomendProduct!.pageNo + 1,
-    });
-    _recomendProduct!.rows.addAll(response.data!.rows);
-    notifyListeners();
-    // response.data!.rows.insertAll(0, recomendProduct!.rows);
-    // _updateRecomendProduct(response.data);
-    return response.data?.totalPage != response.data?.pageNo;
-  }
-
   Future<void> updateHomeInfos() async {
     try {
       await Future.wait([
@@ -94,7 +66,6 @@ class HomeInfos extends ChangeNotifier {
         _updateOnlineExhibitionList(),
         _getNewProduct(),
         _getCompanyOrigin(),
-        _getRecomendProduct(),
       ]);
     } catch (err) {
       print(err);

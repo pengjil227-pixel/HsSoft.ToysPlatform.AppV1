@@ -58,12 +58,12 @@ class CompanyService {
     );
   }
 
-  static Future<ApiResponse<PaginatedResponse<ProductItem>>> getRecomendProduct(Map<dynamic, dynamic> data) async {
+  static Future<ApiResponse<PaginatedResponse<ProductItem>>> getRecomendProduct(int pageNo) async {
     return HttpManager().post(
       '/front/ProductBasic/QueryFrontRecomendProductPage',
       baseUrl: _baseUrl,
       data: {
-        ...data,
+        "pageNo": pageNo,
         "pageSize": 10,
       },
       fromJsonT: (data) {
