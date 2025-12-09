@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -8,11 +7,10 @@ class SmartRefresherHeader extends CustomHeader {
   SmartRefresherHeader({
     super.key,
     super.completeDuration = Duration.zero,
+    super.height = 40,
   }) : super(
           builder: (context, mode) {
-            return Align(
-              child: CustomSpinner(),
-            );
+            return CustomSpinner();
           },
         );
 }
@@ -20,27 +18,24 @@ class SmartRefresherHeader extends CustomHeader {
 class SmartRefresherFooter extends CustomFooter {
   SmartRefresherFooter({
     super.key,
-    super.height = 40,
+    super.height = 0,
   }) : super(
           builder: (context, mode) {
+            String text;
             if (mode == LoadStatus.noMore) {
-              return Align(
-                  child: Text(
-                '没有更多了',
-                style: TextStyle(color: Colors.grey, fontSize: 12),
-              ));
+              text = '没有更多了...';
             } else if (mode == LoadStatus.failed) {
-              return Align(
-                  child: Text(
-                '加载失败',
-                style: TextStyle(color: Colors.grey, fontSize: 12),
-              ));
+              text = '加载失败';
+            } else {
+              text = '正在加载中...';
             }
-            return Align(
-                child: Text(
-              '正在加载中...',
-              style: TextStyle(color: Colors.grey, fontSize: 12),
-            ));
+
+            return SizedBox(
+              height: 40,
+              child: Align(
+                child: Text(text, style: TextStyle(color: Colors.grey, fontSize: 12)),
+              ),
+            );
           },
         );
 }

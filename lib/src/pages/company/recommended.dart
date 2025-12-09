@@ -284,17 +284,18 @@ class _RecommendedPageState extends State<RecommendedPage> {
           ),
           SliverToBoxAdapter(
             child: Container(
-                margin: EdgeInsets.fromLTRB(LayoutConstants.pagePadding, LayoutConstants.pagePadding, LayoutConstants.pagePadding, 0),
-                width: double.infinity,
-                height: 160,
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: CachedNetworkImage(
-                  imageUrl: 'https://testerp-1303814652.cos.ap-guangzhou.myqcloud.com/Uploads/ProImg/Custom/2063/17642057706011.jpg',
-                )),
+              margin: EdgeInsets.fromLTRB(LayoutConstants.pagePadding, LayoutConstants.pagePadding, LayoutConstants.pagePadding, 0),
+              width: double.infinity,
+              height: 160,
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: CachedNetworkImage(
+                imageUrl: 'https://testerp-1303814652.cos.ap-guangzhou.myqcloud.com/Uploads/ProImg/Custom/2063/17642057706011.jpg',
+              ),
+            ),
           ),
           // SliverToBoxAdapter(
           //   child: Selector<HomeInfos, PaginatedResponse<ProductItem>?>(

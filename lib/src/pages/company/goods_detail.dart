@@ -191,7 +191,11 @@ class __GoodsInfoWidgetState extends State<_GoodsInfoWidget> {
       try {
         await widget.parameters.loadmore();
         final newTotal = _products.length;
-        if (total != newTotal) setState(() {});
+        if (total != newTotal) {
+          setState(() {
+            /// update
+          });
+        }
         _canload = true;
       } catch (_) {
         _canload = true;

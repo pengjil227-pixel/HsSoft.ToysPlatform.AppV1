@@ -41,15 +41,15 @@ class _ProductsViewState extends State<ProductsView> {
       final response = await widget.parameter.loadList(_page);
       if (response.success) {
         _products.addAll(response.data!.rows);
-        if (!mounted) return null;
-
         _canload = response.data!.pageNo != response.data!.totalPage;
         _page += 1;
 
-        setState(() {});
+        setState(() {
+          /// update
+        });
         return _canload;
       }
-    } catch (_) {
+    } catch (err) {
       _canload = null;
     }
     return null;
@@ -57,6 +57,7 @@ class _ProductsViewState extends State<ProductsView> {
 
   @override
   Widget build(BuildContext context) {
+    if (_products.isEmpty) SliverFillRemaining(hasScrollBody: false);
     return SliverGrid.builder(
       itemCount: _products.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

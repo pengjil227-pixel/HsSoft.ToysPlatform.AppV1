@@ -114,8 +114,10 @@ class CompanyRoutes {
           GoRoute(
             path: 'search',
             name: 'search',
-            builder: (context, state) {
-              return SearchPage();
+            pageBuilder: (_, GoRouterState state) {
+              return NoTransitionPage(
+                child: SearchPage(),
+              );
             },
           ),
         ],

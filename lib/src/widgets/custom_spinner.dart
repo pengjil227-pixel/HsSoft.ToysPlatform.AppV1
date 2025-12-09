@@ -5,7 +5,7 @@ import 'package:iconfont/iconfont.dart';
 class CustomSpinner extends StatefulWidget {
   const CustomSpinner({
     super.key,
-    this.size = 30,
+    this.size = 40,
   });
 
   final double size;
