@@ -59,6 +59,37 @@ class HomeInfos extends ChangeNotifier {
     _updateCompanyOrigin(response.data!);
   }
 
+  PaginatedResponse<ProductItem>? _recomendProduct;
+  PaginatedResponse<ProductItem>? get recomendProduct => _recomendProduct;
+  int _recomendProductPage = 1;
+
+  void _updateRecomendProduct(PaginatedResponse<ProductItem>? value) {
+    if (_recomendProduct == null) {
+      _recomendProduct = value;
+    } else if (value != null) {
+      _recomendProduct = PaginatedResponse<ProductItem>(
+        rows: [..._recomendProduct!.rows, ...value.rows],
+        pageNo: value.pageNo,
+        pageSize: value.pageSize,
+        totalRows: value.totalRows,
+        totalPage: value.totalPage,
+      );
+    }
+    notifyListeners();
+  }
+
+  Future<void> _getRecomendProduct() async {
+    final response = await CompanyService.getRecomendProduct(_recomendProductPage);
+    _updateRecomendProduct(response.data!);
+  }
+
+  Future<void> loadMoreRecomendProduct() async {
+    if (_recomendProduct != null && _recomendProduct!.pageNo < _recomendProduct!.totalPage) {
+      _recomendProductPage += 1;
+      await _getRecomendProduct();
+    }
+  }
+
   Future<void> updateHomeInfos() async {
     try {
       await Future.wait([
@@ -66,6 +97,7 @@ class HomeInfos extends ChangeNotifier {
         _updateOnlineExhibitionList(),
         _getNewProduct(),
         _getCompanyOrigin(),
+        _getRecomendProduct(),
       ]);
     } catch (err) {
       print(err);

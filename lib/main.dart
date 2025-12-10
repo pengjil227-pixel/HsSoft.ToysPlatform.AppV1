@@ -1,11 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-
 import 'src/core/constants/app_constants.dart';
 import 'src/core/providers/home_infos.dart';
 import 'src/core/providers/login_user.dart';

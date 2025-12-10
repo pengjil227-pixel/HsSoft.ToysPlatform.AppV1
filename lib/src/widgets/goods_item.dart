@@ -1,12 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_wanhaoniu/src/core/providers/home_infos.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../core/constants/layout_constants.dart';
 import '../shared/models/paginated_response.dart';
 import '../shared/models/product.dart';
+import 'products_view.dart';
 
 class GoodsItem extends StatelessWidget {
   const GoodsItem({
@@ -46,7 +46,9 @@ class GoodsItem extends StatelessWidget {
                     borderRadius: BorderRadius.vertical(top: Radius.circular(8.0)),
                     child: Container(
                       color: Colors.white,
-                      padding: imagePadding == EdgeInsets.zero ? const EdgeInsets.symmetric(horizontal: 3, vertical: 3) : imagePadding,
+                      padding: imagePadding == EdgeInsets.zero
+                          ? const EdgeInsets.symmetric(horizontal: 3, vertical: 3)
+                          : imagePadding,
                       alignment: Alignment.center,
                       child: CachedNetworkImage(
                         imageUrl: item.imgUrl,
@@ -118,12 +120,12 @@ class ProductsBuilder extends StatelessWidget {
   const ProductsBuilder({
     super.key,
     required this.item,
-    required this.loadmore,
+    required this.loadMore,
   });
 
   final PaginatedResponse<ProductItem> item;
 
-  final Function() loadmore;
+  final Function() loadMore;
 
   @override
   Widget build(BuildContext context) {
@@ -138,17 +140,18 @@ class ProductsBuilder extends StatelessWidget {
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
-            // final goodsDetailInfo = context.read<GoodsDetailInfo>();
-            // goodsDetailInfo.products = item.rows;
-            // goodsDetailInfo.currentIndex = index;
-            // goodsDetailInfo.loadMore = loadMore;
-
             context.pushNamed(
               'goodsDetail',
+              pathParameters: {
+                'index': index.toString(),
+              },
               extra: ProductsParameters(
-                products: item.rows,
+                products: item.rows, 
                 index: index,
-                loadmore: loadmore,
+                loadmore: () async {
+                  loadMore();
+                  return true;
+                },
               ),
             );
           },
@@ -160,15 +163,4 @@ class ProductsBuilder extends StatelessWidget {
       },
     );
   }
-}
-
-class ProductsParameters {
-  ProductsParameters({
-    required this.products,
-    required this.index,
-    required this.loadmore,
-  });
-  final List<ProductItem> products;
-  final int index;
-  final Function() loadmore;
 }
