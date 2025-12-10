@@ -179,18 +179,14 @@ void _showTopTip(String message) {
     });
   }
 
-void _updateProduct(ProductModel product) {
+  void _updateProduct(ProductModel product) {
     setState(() {
       _data = _data
           .map((FactoryModel factory) {
-            // 修复点：这里不要用 contains(product)，因为对象引用变了。
-            // 而是通过 id 判断这个工厂里是否有这个产品。
-            final bool hasProduct = factory.products.any((p) => p.id == product.id);
-            
+            final bool hasProduct = factory.products.any((ProductModel p) => p.id == product.id);
             if (hasProduct) {
               return factory.copyWith(
                 products: factory.products
-                    // 找到对应 ID 的产品并替换
                     .map((ProductModel p) => p.id == product.id ? product : p)
                     .toList(growable: false),
               );

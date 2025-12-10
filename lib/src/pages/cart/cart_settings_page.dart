@@ -1,14 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-// 1. 定义数据模型 (Model)
 class CartItemModel {
-  final int id;
-  String name;
-  int count;
-  bool isDefault;
-  bool isSelected;
-
   CartItemModel({
     required this.id,
     required this.name,
@@ -16,6 +9,12 @@ class CartItemModel {
     this.isDefault = false,
     this.isSelected = false,
   });
+
+  final int id;
+  String name;
+  int count;
+  bool isDefault;
+  bool isSelected;
 }
 
 class CartSettingsPage extends StatefulWidget {
@@ -26,35 +25,32 @@ class CartSettingsPage extends StatefulWidget {
 }
 
 class _CartSettingsPageState extends State<CartSettingsPage> {
-  // 模拟数据源
-  final List<CartItemModel> _items = [
+  // 使用静态数据源，离开页面后也能保留新增的择样车
+  static final List<CartItemModel> _items = <CartItemModel>[
     CartItemModel(id: 1, name: '择样车名称1 (常规)', count: 8, isDefault: true),
-    CartItemModel(id: 2, name: '这是一个名字非常非常长的择样车名称测试溢出', count: 12, isDefault: false),
-    CartItemModel(id: 3, name: '展厅临时车', count: 5, isDefault: false),
+    CartItemModel(id: 2, name: '这是一个名字非常非常长的择样车名称测试溢出', count: 12),
+    CartItemModel(id: 3, name: '展厅临时车', count: 5),
   ];
-  int _nextId = 4;
+  static int _nextId = 4;
 
-  // 全选/取消全选逻辑
   void _toggleSelectAll() {
     setState(() {
-      final bool isAllSelected = _items.every((item) => item.isSelected);
-      for (var item in _items) {
+      final bool isAllSelected = _items.isNotEmpty && _items.every((CartItemModel i) => i.isSelected);
+      for (final CartItemModel item in _items) {
         item.isSelected = !isAllSelected;
       }
     });
   }
 
-  // 单个选中逻辑
   void _toggleItemSelection(int index) {
     setState(() {
       _items[index].isSelected = !_items[index].isSelected;
     });
   }
 
-  // 设置默认逻辑
   void _setDefault(int index) {
     setState(() {
-      for (var item in _items) {
+      for (final CartItemModel item in _items) {
         item.isDefault = false;
       }
       _items[index].isDefault = true;
@@ -63,11 +59,10 @@ class _CartSettingsPageState extends State<CartSettingsPage> {
 
   Future<void> _editCartName(int index) async {
     if (index < 0 || index >= _items.length || !mounted) return;
-    final result = await showDialog<String>(
+    final String? result = await showDialog<String>(
       context: context,
       builder: (_) => _CartNameDialog(initialName: _items[index].name),
     );
-
     if (!mounted || result == null || result.isEmpty) return;
     setState(() {
       _items[index].name = result;
@@ -75,8 +70,7 @@ class _CartSettingsPageState extends State<CartSettingsPage> {
   }
 
   Future<void> _addNewCart() async {
-    final newName = '择样车${_items.length + 1}';
-    final newItem = CartItemModel(id: _nextId++, name: newName, count: 0);
+    final CartItemModel newItem = CartItemModel(id: _nextId++, name: '择样车${_items.length + 1}');
     setState(() {
       _items.add(newItem);
     });
@@ -84,11 +78,11 @@ class _CartSettingsPageState extends State<CartSettingsPage> {
   }
 
   void _deleteSelected() {
-    if (_items.every((i) => !i.isSelected)) return;
+    if (_items.every((CartItemModel i) => !i.isSelected)) return;
     setState(() {
-      final bool defaultWillBeRemoved = _items.any((i) => i.isDefault && i.isSelected);
-      _items.removeWhere((i) => i.isSelected);
-      if (_items.isNotEmpty && defaultWillBeRemoved && !_items.any((i) => i.isDefault)) {
+      final bool defaultRemoved = _items.any((CartItemModel i) => i.isDefault && i.isSelected);
+      _items.removeWhere((CartItemModel i) => i.isSelected);
+      if (_items.isNotEmpty && defaultRemoved && !_items.any((CartItemModel i) => i.isDefault)) {
         _items.first.isDefault = true;
       }
     });
@@ -97,8 +91,8 @@ class _CartSettingsPageState extends State<CartSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final selectedCount = _items.where((i) => i.isSelected).length;
-    final isAllSelected = _items.isNotEmpty && _items.every((i) => i.isSelected);
+    final int selectedCount = _items.where((CartItemModel i) => i.isSelected).length;
+    final bool isAllSelected = _items.isNotEmpty && _items.every((CartItemModel i) => i.isSelected);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -127,8 +121,7 @@ class _CartSettingsPageState extends State<CartSettingsPage> {
       body: ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 12),
         itemCount: _items.length,
-        itemBuilder: (context, index) {
-          // 2. 使用独立的 Widget 渲染每一行，性能更好
+        itemBuilder: (BuildContext context, int index) {
           return CartItemTile(
             item: _items[index],
             onSelectChanged: () => _toggleItemSelection(index),
@@ -158,11 +151,9 @@ class _CartSettingsPageState extends State<CartSettingsPage> {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: selectedCount == 0
-                    ? null
-                    : _deleteSelected,
+                onPressed: selectedCount == 0 ? null : _deleteSelected,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.primaryColor, // 这里的红色应该是你主题色
+                  backgroundColor: theme.primaryColor,
                   disabledBackgroundColor: Colors.grey[300],
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                   shape: RoundedRectangleBorder(
@@ -181,7 +172,6 @@ class _CartSettingsPageState extends State<CartSettingsPage> {
     );
   }
 
-  // 提取复选框样式
   Widget _buildCheckbox(bool isSelected, ThemeData theme) {
     return Container(
       width: 20,
@@ -194,22 +184,12 @@ class _CartSettingsPageState extends State<CartSettingsPage> {
         ),
         color: isSelected ? theme.primaryColor : Colors.transparent,
       ),
-      child: isSelected
-          ? const Icon(Icons.check, size: 14, color: Colors.white)
-          : null,
+      child: isSelected ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
     );
   }
 }
 
-// --------------------------------------------------------------------------
-// 3. 独立的列表项组件 (解决性能和代码臃肿问题)
-// --------------------------------------------------------------------------
 class CartItemTile extends StatelessWidget {
-  final CartItemModel item;
-  final VoidCallback onSelectChanged;
-  final VoidCallback onSetDefault;
-  final VoidCallback onEdit;
-
   const CartItemTile({
     super.key,
     required this.item,
@@ -217,6 +197,11 @@ class CartItemTile extends StatelessWidget {
     required this.onSetDefault,
     required this.onEdit,
   });
+
+  final CartItemModel item;
+  final VoidCallback onSelectChanged;
+  final VoidCallback onSetDefault;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -231,10 +216,9 @@ class CartItemTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // 左侧：选择框
           GestureDetector(
             onTap: onSelectChanged,
-            behavior: HitTestBehavior.opaque, // 扩大点击区域
+            behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: const EdgeInsets.only(right: 12),
               child: Container(
@@ -248,21 +232,16 @@ class CartItemTile extends StatelessWidget {
                   ),
                   color: item.isSelected ? theme.primaryColor : Colors.transparent,
                 ),
-                child: item.isSelected
-                    ? const Icon(Icons.check, size: 14, color: Colors.white)
-                    : null,
+                child: item.isSelected ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
               ),
             ),
           ),
-
-          // 中间：信息区域 (使用 Flexible 防止文字溢出)
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    // 4. 关键修复：使用 Flexible 包裹 Text，并设置 ellipsis
                     Flexible(
                       child: Text(
                         item.name,
@@ -299,9 +278,6 @@ class CartItemTile extends StatelessWidget {
               ],
             ),
           ),
-
-          // 右侧：操作按钮
-          // 使用 Row + mainAxisSize: min 紧凑排列
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -320,7 +296,7 @@ class CartItemTile extends StatelessWidget {
                     child: const Text('设为默认', style: TextStyle(fontSize: 12)),
                   ),
                 ),
-              if (!item.isDefault) const SizedBox(width: 8), // 按钮间距
+              if (!item.isDefault) const SizedBox(width: 8),
               SizedBox(
                 height: 28,
                 child: OutlinedButton(
@@ -344,8 +320,9 @@ class CartItemTile extends StatelessWidget {
 }
 
 class _CartNameDialog extends StatefulWidget {
-  final String initialName;
   const _CartNameDialog({required this.initialName});
+
+  final String initialName;
 
   @override
   State<_CartNameDialog> createState() => _CartNameDialogState();
