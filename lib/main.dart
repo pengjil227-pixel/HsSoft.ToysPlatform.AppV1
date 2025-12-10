@@ -8,7 +8,6 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'src/core/constants/app_constants.dart';
 import 'src/core/providers/home_infos.dart';
-import 'src/core/providers/goods_detail_info.dart';
 import 'src/core/providers/login_user.dart';
 import 'src/core/theme/cms_theme/cms_theme.dart';
 import 'src/routes/app_router.dart';
@@ -21,7 +20,6 @@ void main() async {
   ));
 
   WidgetsFlutterBinding.ensureInitialized();
-
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   LoginUserInfo? loginUserInfo;
@@ -29,25 +27,23 @@ void main() async {
   if (loginUser != null) {
     loginUserInfo = LoginUserInfo.fromJson(jsonDecode(loginUser));
   }
-
   LoginInfoSingleton.loginUserInfo = loginUserInfo;
 
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => LoginUser()),
-      // ChangeNotifierProvider(create: (_) => GoodsDetailInfo()),
       ChangeNotifierProvider(create: (_) => HomeInfos()),
     ],
     child: MyApp(),
   ));
-} 
+}
 
 class MyApp extends StatelessWidget {
   MyApp({
     super.key,
   });
 
-  late final route = AppRouter(initialLocation: AppConstants.isFactoryUser(LoginInfoSingleton.loginUserInfo) ? '/factoryHome' : '/').router;
+  final route = AppRouter(initialLocation: AppConstants.isFactoryUser(LoginInfoSingleton.loginUserInfo) ? '/factoryHome' : '/').router;
 
   @override
   Widget build(BuildContext context) {

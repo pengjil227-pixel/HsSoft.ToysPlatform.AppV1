@@ -311,8 +311,11 @@ class _RecommendedPageState extends State<RecommendedPage> {
           //     },
           //   ),
           // ),
-          ProductsView(
-            parameter: _smartRefresherParameter,
+          SliverPadding(
+            padding: EdgeInsets.all(LayoutConstants.pagePadding),
+            sliver: ProductsView(
+              parameter: _smartRefresherParameter,
+            ),
           ),
         ],
       ),
