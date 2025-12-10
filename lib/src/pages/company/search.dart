@@ -66,10 +66,11 @@ class _SearchPageState extends State<SearchPage> {
       if (newValue.length > 20) {
         newValue.removeLast();
       }
-      _searchs.value = newValue;
       await saveSearchHistory(_searchs.value);
+      _searchs.value = newValue;
       _onTabChange(_sortingParams.value.copyWith(keywords: value));
       _isSearch.value = true;
+      _focusNode.unfocus();
     }
   }
 
