@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_wanhaoniu/src/core/constants/layout_constants.dart';
-import 'package:flutter_wanhaoniu/src/widgets/primart_button.dart';
+import 'package:flutter_wanhaoniu/src/widgets/search_wrap.dart';
 import 'package:iconfont/iconfont.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -134,71 +134,81 @@ class _SearchPageState extends State<SearchPage> {
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
-        title: Container(
-          clipBehavior: Clip.hardEdge,
-          margin: EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(
-              width: 0.6,
-              color: Color(0xFFF30213),
+        title: Padding(
+          padding: EdgeInsets.only(right: LayoutConstants.pagePadding),
+          child: SearchWrap(
+            onSearch: () {
+              _focusNode.unfocus();
+              _onSearch(_controller.text);
+            },
+            child: TextField(
+              onTap: () {
+                _isSearch.value = false;
+              },
+              autofocus: true,
+              onSubmitted: _onSearch,
+              focusNode: _focusNode,
+              controller: _controller,
+              textInputAction: TextInputAction.search,
+              style: TextStyle(fontSize: 15, height: 1.2),
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                ),
+              ),
             ),
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  onTap: () {
-                    _isSearch.value = false;
-                  },
-                  autofocus: true,
-                  onSubmitted: _onSearch,
-                  focusNode: _focusNode,
-                  controller: _controller,
-                  textInputAction: TextInputAction.search,
-                  style: TextStyle(fontSize: 15, height: 1.2),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 40,
-                height: 34,
-                child: Align(
-                  child: Icon(
-                    Iconfont.paizhao,
-                    size: 18,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 2),
-                child: SizedBox(
-                  height: 26,
-                  child: PrimartButton(
-                    onPressed: () {
-                      _focusNode.unfocus();
-                      _onSearch(_controller.text);
-                    },
-                    color: Color(0xFFF30213),
-                    padding: EdgeInsets.symmetric(horizontal: 14),
-                    borderRadius: BorderRadius.circular(4.0),
-                    child: Text(
-                      '搜索',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ),
         ),
+        //  Container(
+        //   clipBehavior: Clip.hardEdge,
+        //   margin: EdgeInsets.only(right: 8),
+        //   decoration: BoxDecoration(
+        //     color: Colors.white,
+        //     borderRadius: BorderRadius.circular(8.0),
+        //     border: Border.all(
+        //       width: 0.6,
+        //       color: Color(0xFFF30213),
+        //     ),
+        //   ),
+        //   child: Row(
+        //     children: [
+        //       Expanded(
+        //         child: ,
+        //       ),
+        //       SizedBox(
+        //         width: 40,
+        //         height: 34,
+        //         child: Align(
+        //           child: Icon(
+        //             Iconfont.paizhao,
+        //             size: 18,
+        //           ),
+        //         ),
+        //       ),
+        //       Padding(
+        //         padding: EdgeInsets.symmetric(horizontal: 2),
+        //         child: SizedBox(
+        //           height: 26,
+        //           child: PrimartButton(
+        //             onPressed: () {
+        //               _focusNode.unfocus();
+        //               _onSearch(_controller.text);
+        //             },
+        //             color: Color(0xFFF30213),
+        //             padding: EdgeInsets.symmetric(horizontal: 14),
+        //             borderRadius: BorderRadius.circular(4.0),
+        //             child: Text(
+        //               '搜索',
+        //               style: TextStyle(color: Colors.white),
+        //             ),
+        //           ),
+        //         ),
+        //       )
+        //     ],
+        //   ),
+        // ),
       ),
       body: ValueListenableBuilder(
         valueListenable: _isSearch,
@@ -215,8 +225,8 @@ class _SearchPageState extends State<SearchPage> {
                 controller: _scrollController,
                 slivers: [
                   SliverPersistentHeader(
-                    pinned: true, // 吸顶固定
-                    floating: false, // 向上滑动时立即出现
+                    pinned: true,
+                    floating: false,
                     delegate: _StickyHeaderDelegate(
                       minHeight: 40.0,
                       maxHeight: 40.0,

@@ -6,6 +6,20 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "46312599",
+      "name": "三角-圆1",
+      "font_class": "sanjiao-yuan1",
+      "unicode": "e688",
+      "unicode_decimal": 59016
+    },
+    {
+      "icon_id": "46312598",
+      "name": "三角-圆2",
+      "font_class": "sanjiao-yuan2",
+      "unicode": "e68a",
+      "unicode_decimal": 59018
+    },
+    {
       "icon_id": "30796103",
       "name": "loading",
       "font_class": "loading",

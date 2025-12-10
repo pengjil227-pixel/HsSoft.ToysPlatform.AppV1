@@ -1,7 +1,9 @@
+import 'package:flutter_wanhaoniu/src/pages/company/exhibition_detail.dart';
 import 'package:flutter_wanhaoniu/src/pages/company/search.dart';
 import 'package:flutter_wanhaoniu/src/shared/models/source_supplier.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../pages/company/exhibition_hall.dart';
 import '../../pages/company/goods_detail.dart';
 import '../../pages/company/home_screen.dart';
 import '../../pages/company/setting.dart';
@@ -119,6 +121,21 @@ class CompanyRoutes {
                 child: SearchPage(),
               );
             },
+          ),
+          GoRoute(
+            path: 'exhibitionHall',
+            name: 'exhibitionHall',
+            builder: (context, state) => const ExhibitionHall(),
+            routes: [
+              GoRoute(
+                path: 'exhibitionDetail/:id',
+                name: 'exhibitionDetail',
+                builder: (context, state) {
+                  final id = int.tryParse(state.pathParameters['id']!) ?? 0;
+                  return ExhibitionDetail(id: id);
+                },
+              ),
+            ],
           ),
         ],
       ),

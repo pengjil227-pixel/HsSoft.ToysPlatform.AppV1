@@ -7,6 +7,8 @@ import 'constants.dart';
 const String _fontFamily = 'Iconfont';
 
 class Iconfont {
+  static const IconData sanjiao_yuan1 = IconData(0xe688, fontFamily: _fontFamily, fontPackage: packageName);
+  static const IconData sanjiao_yuan2 = IconData(0xe68a, fontFamily: _fontFamily, fontPackage: packageName);
   static const IconData loading = IconData(0xe689, fontFamily: _fontFamily, fontPackage: packageName);
   static const IconData yixiajia = IconData(0xe687, fontFamily: _fontFamily, fontPackage: packageName);
   static const IconData duochuangkoumoshi = IconData(0xe930, fontFamily: _fontFamily, fontPackage: packageName);

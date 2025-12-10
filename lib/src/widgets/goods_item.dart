@@ -1,8 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_wanhaoniu/src/core/providers/home_infos.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../core/constants/layout_constants.dart';
 import '../shared/models/paginated_response.dart';
@@ -51,7 +49,7 @@ class GoodsItem extends StatelessWidget {
                       child: CachedNetworkImage(
                         imageUrl: item.imgUrl,
                         fit: BoxFit.contain,
-                        errorWidget: (context, url, error) => Icon(Icons.error),
+                        errorWidget: (context, url, error) => Image.asset('assets/images/space.png'),
                       ),
                     ),
                   ),

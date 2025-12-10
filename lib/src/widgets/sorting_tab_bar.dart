@@ -134,7 +134,7 @@ class _SortingTabBarState extends State<SortingTabBar> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Iconfont.xiala1,
+                    Iconfont.sanjiao_yuan2,
                     size: 4,
                     color: _sortField == sorting.sortField && _sortOrder == SortOrder.ascending ? color : Color(0xFF666666),
                   ),
@@ -142,7 +142,7 @@ class _SortingTabBarState extends State<SortingTabBar> {
                     height: 4,
                   ),
                   Icon(
-                    Iconfont.xiala2,
+                    Iconfont.sanjiao_yuan1,
                     size: 4,
                     color: _sortField == sorting.sortField && _sortOrder == SortOrder.Dscend ? color : Color(0xFF666666),
                   ),

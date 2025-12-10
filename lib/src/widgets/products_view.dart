@@ -6,6 +6,7 @@ import '../core/constants/layout_constants.dart';
 import '../core/network/api_response.dart';
 import '../shared/models/paginated_response.dart';
 import '../shared/models/product.dart';
+import 'products_card.dart';
 
 class ProductsView extends StatefulWidget {
   const ProductsView({
@@ -57,7 +58,6 @@ class _ProductsViewState extends State<ProductsView> {
 
   @override
   Widget build(BuildContext context) {
-    if (_products.isEmpty) SliverFillRemaining(hasScrollBody: false);
     return SliverGrid.builder(
       itemCount: _products.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -78,7 +78,7 @@ class _ProductsViewState extends State<ProductsView> {
               ),
             );
           },
-          child: GoodsItem(
+          child: ProductsCard(
             key: ValueKey(_products[index].productNumber),
             item: _products[index],
           ),

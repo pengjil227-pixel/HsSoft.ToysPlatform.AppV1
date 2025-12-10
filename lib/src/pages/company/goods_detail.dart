@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wanhaoniu/src/core/constants/layout_constants.dart';
 import 'package:flutter_wanhaoniu/src/widgets/primart_button.dart';
+import 'package:flutter_wanhaoniu/src/widgets/user_tile.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconfont/iconfont.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -126,7 +127,6 @@ class _GoodsDetailState extends State<GoodsDetail> {
 
 class _GoodsInfoWidget extends StatefulWidget {
   const _GoodsInfoWidget({
-    super.key,
     required this.alpha,
     required this.parameters,
     required this.onScroll,
@@ -221,6 +221,7 @@ class __GoodsInfoWidgetState extends State<_GoodsInfoWidget> {
           controller: _pageController,
           itemBuilder: (context, index) {
             return _DetailItem(
+              key: ValueKey(_products[index].productNumber),
               alpha: widget.alpha,
               productInfo: _products[index],
               productDetail: _current == index ? value : null,
@@ -444,6 +445,7 @@ class __DetailItemState extends State<_DetailItem> {
         Padding(
           padding: EdgeInsets.only(bottom: LayoutConstants.pagePadding * 2 + View.of(context).padding.bottom / View.of(context).devicePixelRatio + _bottomHeight),
           child: SmartRefresher(
+            enablePullDown: false,
             enablePullUp: true,
             header: SmartRefresherHeader(),
             footer: SmartRefresherFooter(),
@@ -605,101 +607,82 @@ class __DetailItemState extends State<_DetailItem> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8.0),
                       ),
-                      child: SizedBox(
-                        height: 86,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(100),
-                                child: Image.asset(
-                                  'assets/images/logo.png',
-                                  width: 60,
-                                  height: 60,
-                                ),
-                              ),
-                              Expanded(
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 8),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('耀昇玩具展厅', style: TextStyle(fontSize: 18)),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            '产品:',
-                                            style: TextStyle(color: Colors.grey),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  PrimartButton(
-                                    padding: EdgeInsets.zero,
-                                    borderRadius: BorderRadius.zero,
-                                    sizeStyle: CupertinoButtonSize.small,
-                                    onPressed: () {},
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(width: 1, color: Color(0xFFF30213)),
-                                        borderRadius: BorderRadius.circular(4.0),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(Iconfont.lianxiwomen, color: Color(0xFFF30213)),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            '关注',
-                                            style: TextStyle(color: Color(0xFFF30213)),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: 8),
-                                  PrimartButton(
-                                    padding: EdgeInsets.zero,
-                                    borderRadius: BorderRadius.zero,
-                                    sizeStyle: CupertinoButtonSize.small,
-                                    onPressed: () {},
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(width: 1, color: Color(0xFFFF9700)),
-                                        borderRadius: BorderRadius.circular(4.0),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(Iconfont.lianxiwomen, color: Color(0xFFFF9700)),
-                                          SizedBox(width: 4),
-                                          Text(
-                                            '联系',
-                                            style: TextStyle(color: Color(0xFFFF9700)),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            ],
+                      child: UserTile(
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            width: 60,
+                            height: 60,
                           ),
+                        ),
+                        title: Text('耀昇玩具展厅'),
+                        subtitle: Row(
+                          children: [Text('关注: '), Text('99', style: TextStyle(color: Color(0xFF111111)),)],
+                        ),
+                        trailing: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            PrimartButton(
+                              padding: EdgeInsets.zero,
+                              borderRadius: BorderRadius.zero,
+                              sizeStyle: CupertinoButtonSize.small,
+                              onPressed: () {},
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  border: Border.all(width: 1, color: Color(0xFFF30213)),
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Iconfont.guanzhuchangshang, color: Color(0xFFF30213)),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      '联系',
+                                      style: TextStyle(color: Color(0xFFF30213), height: 1),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            PrimartButton(
+                              padding: EdgeInsets.zero,
+                              borderRadius: BorderRadius.zero,
+                              sizeStyle: CupertinoButtonSize.small,
+                              onPressed: () {},
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  border: Border.all(width: 1, color: Color(0xFFFF9700)),
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Iconfont.lianxiwomen, color: Color(0xFFFF9700)),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      '联系',
+                                      style: TextStyle(color: Color(0xFFFF9700), height: 1),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
                 if (hasDetail)
-                  ProductsView(
-                    parameter: _smartRefresherParameter,
+                  SliverPadding(
+                    padding: EdgeInsets.all(LayoutConstants.pagePadding),
+                    sliver: ProductsView(
+                      parameter: _smartRefresherParameter,
+                    ),
                   ),
               ],
             ),
