@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:iconfont/iconfont.dart';
-import 'package:provider/provider.dart';
-
-import '../../core/providers/home_infos.dart';
 import '../../widgets/keep_alive_page.dart';
 import '../../widgets/page_screen.dart';
 import 'home.dart';
+import 'cart.dart';
 import 'message/message_page.dart';
 import 'my.dart';
 
@@ -15,12 +13,13 @@ class HomeScreen extends StatelessWidget {
   static final List<Widget> _pages = [
     KeepAlivePage(child: HomePage()),
     KeepAlivePage(child: MessagePage()),
+    KeepAlivePage(child: CartPage()),
     KeepAlivePage(child: MyPage()),
   ];
 
   final List<CustomBottomNavigationBarItem> _items = [
     CustomBottomNavigationBarItem(
-      label: '工作台',
+      label: '首页',
       icon: Icon(Colorfont.shouye),
       activeIcon: Icon(Colorfont.shouye_selected),
     ),
@@ -28,6 +27,11 @@ class HomeScreen extends StatelessWidget {
       label: '消息',
       icon: Icon(Colorfont.xiaoxi1),
       activeIcon: Icon(Colorfont.xiaoxi_selected),
+    ),
+    CustomBottomNavigationBarItem(
+      label: '择样车',
+      icon: Icon(Colorfont.zeyangche),
+      activeIcon: Icon(Colorfont.zeyangche_selected),
     ),
     CustomBottomNavigationBarItem(
       label: '我的',

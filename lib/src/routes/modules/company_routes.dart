@@ -1,8 +1,9 @@
-import 'package:flutter_wanhaoniu/src/pages/company/exhibition_detail.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_wanhaoniu/src/pages/company/search.dart';
 import 'package:flutter_wanhaoniu/src/shared/models/source_supplier.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../pages/company/exhibition_detail.dart';
 import '../../pages/company/exhibition_hall.dart';
 import '../../pages/company/goods_detail.dart';
 import '../../pages/company/home_screen.dart';
@@ -12,6 +13,7 @@ import '../../pages/company/setting_pages/user_info_page.dart';
 //关于我们
 import '../../pages/company/setting_pages/about_us_page.dart';
 import '../../pages/company/category_page.dart';
+import '../../pages/company/cart.dart';
 import '../../pages/company/sourcefactory/factory_detail.dart';
 import '../../pages/company/sourcefactory/factory_name_page.dart';
 import '../../pages/company/sourcefactory/factory_list_page.dart';
@@ -19,7 +21,15 @@ import '../../pages/company/my/company_info_page.dart';
 import '../../pages/company/my/account_manage_page.dart';
 import '../../pages/company/my/online_service_page.dart';
 import '../../pages/company/my/product_compare_page.dart';
-import '../../widgets/goods_item.dart';
+import '../../pages/cart/cart_settings_page.dart';
+import '../../pages/company/my/browse_history_page.dart';
+import '../../pages/company/my/collection_page.dart';
+import '../../pages/company/my/follow_factory_page.dart';
+import '../../pages/company/my/sample_quote_create_page.dart';
+import '../../pages/company/my/sample_quote_page.dart';
+import '../../pages/company/my/sample_quote_detail_page.dart';
+import '../../pages/company/my/sample_quote_state.dart';
+import '../../widgets/products_view.dart';
 
 class CompanyRoutes {
   static List<GoRoute> get routes {
@@ -84,14 +94,33 @@ class CompanyRoutes {
             ],
           ),
           GoRoute(
-            path: 'goodsDetail',
+            path: 'goodsDetail/:index',
             name: 'goodsDetail',
             builder: (context, state) {
-              ProductsParameters parameters = state.extra as ProductsParameters;
-              return GoodsDetail(
-                parameters: parameters,
+              // 从extra中获取ProductsParameters对象
+              if (state.extra is ProductsParameters) {
+                return GoodsDetail(
+                  parameters: state.extra as ProductsParameters,
+                );
+              }
+              // 如果没有传递extra，返回错误页面或空页面
+              return Scaffold(
+                appBar: AppBar(title: const Text('商品详情')),
+                body: const Center(child: Text('商品信息加载失败')),
               );
             },
+          ),
+          GoRoute(
+            path: 'cart',
+            name: 'cart',
+            builder: (context, state) => const CartPage(),
+            routes: [
+              GoRoute(
+                path: 'settings',
+                name: 'cartSettings',
+                builder: (context, state) => const CartSettingsPage(),
+              ),
+            ],
           ),
           GoRoute(
             path: 'companyInfo',
@@ -114,6 +143,63 @@ class CompanyRoutes {
             builder: (context, state) => const ProductComparePage(),
           ),
           GoRoute(
+            path: 'browseHistory',
+            name: 'browseHistory',
+            builder: (context, state) => const BrowseHistoryPage(),
+          ),
+          GoRoute(
+            path: 'collection',
+            name: 'collection',
+            builder: (context, state) => const CollectionPage(),
+          ),
+          GoRoute(
+            path: 'followFactory',
+            name: 'followFactory',
+            builder: (context, state) => const FollowFactoryPage(),
+          ),
+          GoRoute(
+            path: 'sampleQuote',
+            name: 'sampleQuote',
+            builder: (context, state) {
+              final SampleQuoteRecord? record = state.extra is SampleQuoteRecord ? state.extra as SampleQuoteRecord : null;
+              return SampleQuotePage(pendingRecord: record);
+            },
+            routes: [
+              GoRoute(
+                path: 'create',
+                name: 'sampleQuoteCreate',
+                builder: (context, state) {
+                  final Object? extra = state.extra;
+                  final List<QuoteProductInput> products = extra is List<QuoteProductInput> ? extra : <QuoteProductInput>[];
+                  return SampleQuoteCreatePage(selectedProducts: products);
+                },
+              ),
+              GoRoute(
+                path: 'detail',
+                name: 'sampleQuoteDetail',
+                builder: (context, state) {
+                  final SampleQuoteRecord? record = state.extra is SampleQuoteRecord ? state.extra as SampleQuoteRecord : null;
+                  return SampleQuoteDetailPage(quote: record);
+                },
+              ),
+              GoRoute(
+                path: 'exhibitionHall',
+                name: 'exhibitionHall',
+                builder: (context, state) => const ExhibitionHall(),
+                routes: [
+                  GoRoute(
+                    path: 'exhibitionDetail/:id',
+                    name: 'exhibitionDetail',
+                    builder: (context, state) {
+                      final id = int.tryParse(state.pathParameters['id']!) ?? 0;
+                      return ExhibitionDetail(id: id);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          GoRoute(
             path: 'search',
             name: 'search',
             pageBuilder: (_, GoRouterState state) {
@@ -121,21 +207,6 @@ class CompanyRoutes {
                 child: SearchPage(),
               );
             },
-          ),
-          GoRoute(
-            path: 'exhibitionHall',
-            name: 'exhibitionHall',
-            builder: (context, state) => const ExhibitionHall(),
-            routes: [
-              GoRoute(
-                path: 'exhibitionDetail/:id',
-                name: 'exhibitionDetail',
-                builder: (context, state) {
-                  final id = int.tryParse(state.pathParameters['id']!) ?? 0;
-                  return ExhibitionDetail(id: id);
-                },
-              ),
-            ],
           ),
         ],
       ),

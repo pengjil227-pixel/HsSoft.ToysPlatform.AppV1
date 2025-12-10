@@ -4,7 +4,10 @@ import 'package:iconfont/iconfont.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/layout_constants.dart';
+import '../../core/providers/home_infos.dart';
 import '../../core/providers/login_user.dart';
+import '../../shared/models/paginated_response.dart';
+import '../../shared/models/product.dart';
 import '../../widgets/goods_item.dart';
 import '../../widgets/primart_button.dart';
 
@@ -20,15 +23,15 @@ class _MyPageState extends State<MyPage> {
 
   @override
   void dispose() {
-    super.dispose();
     _scrollController.dispose();
+    super.dispose();
   }
 
   PreferredSizeWidget _appBarBuilder() {
     return AppBar(
       toolbarHeight: 0,
       flexibleSpace: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color(0xFFFEE9E8),
@@ -40,13 +43,13 @@ class _MyPageState extends State<MyPage> {
         ),
       ),
       bottom: PreferredSize(
-        preferredSize: Size.fromHeight(76),
+        preferredSize: const Size.fromHeight(76),
         child: Padding(
-          padding: EdgeInsets.all(LayoutConstants.pagePadding),
+          padding: const EdgeInsets.all(LayoutConstants.pagePadding),
           child: SizedBox(
             height: 60,
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: LayoutConstants.pagePadding),
+              padding: const EdgeInsets.symmetric(horizontal: LayoutConstants.pagePadding),
               child: Consumer<LoginUser>(
                 builder: (context, LoginUser loginUser, _) {
                   final Widget avatar;
@@ -62,10 +65,10 @@ class _MyPageState extends State<MyPage> {
                       ),
                     );
                     title = Text(
-                      user!.name ?? '',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      user?.name ?? '',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     );
-                    detail = user.companyInfos.first.companyName;
+                    detail = user?.companyInfos.first.companyName;
                   } else {
                     void goLogin() {
                       context.pushNamed('login');
@@ -80,7 +83,7 @@ class _MyPageState extends State<MyPage> {
                     );
                     title = GestureDetector(
                       onTap: goLogin,
-                      child: Text(
+                      child: const Text(
                         '登录',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
@@ -92,7 +95,7 @@ class _MyPageState extends State<MyPage> {
                       avatar,
                       Expanded(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -100,8 +103,8 @@ class _MyPageState extends State<MyPage> {
                               title,
                               if (detail != null)
                                 Text(
-                                  '宏升玩具厂',
-                                  style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
+                                  detail,
+                                  style: const TextStyle(fontSize: 14, color: Color(0xFF666666)),
                                 ),
                             ],
                           ),
@@ -110,11 +113,11 @@ class _MyPageState extends State<MyPage> {
                       Row(
                         children: [
                           PrimartButton(
-                            padding: EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(8.0),
                             onPressed: () {},
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
-                              children: [
+                              children: const [
                                 Icon(
                                   Iconfont.saoma,
                                   size: 18,
@@ -131,13 +134,13 @@ class _MyPageState extends State<MyPage> {
                             ),
                           ),
                           PrimartButton(
-                            padding: EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(8.0),
                             onPressed: () {
                               context.pushNamed('setting');
                             },
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
-                              children: [
+                              children: const [
                                 Icon(
                                   Iconfont.shezhi,
                                   size: 18,
@@ -174,14 +177,14 @@ class _MyPageState extends State<MyPage> {
       children: [
         child,
         Padding(
-          padding: EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.only(top: 8),
           child: Text(text),
         ),
       ],
     );
   }
 
-  final List<_Action> _subActions = [
+  final List<_Action> _subActions = const [
     _Action(
       text: '公司信息',
       actionType: _ActionType.information,
@@ -199,7 +202,7 @@ class _MyPageState extends State<MyPage> {
       actionType: _ActionType.comparison,
     ),
   ];
-  final List<_Action> _actions = [
+  final List<_Action> _actions = const [
     _Action(
       text: '浏览记录',
       actionType: _ActionType.browse,
@@ -213,23 +216,24 @@ class _MyPageState extends State<MyPage> {
       actionType: _ActionType.follow,
     ),
     _Action(
-      text: '择样报价',
+      text: '采样报价',
       actionType: _ActionType.sample,
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     return Scaffold(
       appBar: _appBarBuilder(),
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           SliverToBoxAdapter(
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFFFFF2EC), theme.scaffoldBackgroundColor],
+                  colors: [const Color(0xFFFFF2EC), theme.scaffoldBackgroundColor],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -237,14 +241,19 @@ class _MyPageState extends State<MyPage> {
               child: Column(
                 children: [
                   Container(
-                    padding: EdgeInsets.only(top: LayoutConstants.pagePadding),
-                    margin: EdgeInsets.fromLTRB(LayoutConstants.pagePadding, LayoutConstants.pagePadding, LayoutConstants.pagePadding, 0),
+                    padding: const EdgeInsets.only(top: LayoutConstants.pagePadding),
+                    margin: const EdgeInsets.fromLTRB(
+                      LayoutConstants.pagePadding,
+                      LayoutConstants.pagePadding,
+                      LayoutConstants.pagePadding,
+                      0,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.primaryColor,
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8.0),
@@ -259,12 +268,11 @@ class _MyPageState extends State<MyPage> {
                                 context.pushNamed(action.routeName!);
                               }
                             },
-                        
-                       child: Padding(
+                            child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                               child: _actionBuilder(
                                 text: action.text,
-                                child: Text(
+                                child: const Text(
                                   '1',
                                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, height: 1.2),
                                 ),
@@ -276,8 +284,13 @@ class _MyPageState extends State<MyPage> {
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.fromLTRB(LayoutConstants.pagePadding, LayoutConstants.pagePadding, LayoutConstants.pagePadding, 0),
-                    padding: EdgeInsets.symmetric(vertical: 12),
+                    margin: const EdgeInsets.fromLTRB(
+                      LayoutConstants.pagePadding,
+                      LayoutConstants.pagePadding,
+                      LayoutConstants.pagePadding,
+                      LayoutConstants.pagePadding,
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8.0),
@@ -301,7 +314,7 @@ class _MyPageState extends State<MyPage> {
                                 color: Colors.greenAccent,
                                 borderRadius: BorderRadius.circular(100),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.access_time_outlined,
                                 color: Colors.white,
                               ),
@@ -315,21 +328,36 @@ class _MyPageState extends State<MyPage> {
               ),
             ),
           ),
+          SliverToBoxAdapter(
+            child: Selector<HomeInfos, PaginatedResponse<ProductItem>?>(
+              selector: (_, model) => model.recomendProduct,
+              builder: (context, value, __) {
+                if (value == null || value.rows.isEmpty) return const SizedBox.shrink();
+                return const SizedBox(
+                  height: 4,
+                  child: Align(
+                    // child: Text('推荐产品', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ),
+                );
+              },
+            ),
+          ),
           SliverPadding(
-            padding: EdgeInsets.all(LayoutConstants.pagePadding),
-            sliver: SliverGrid.builder(
-              itemCount: 10,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: LayoutConstants.pagePadding,
-                mainAxisSpacing: LayoutConstants.pagePadding,
-                childAspectRatio: 0.9,
-              ),
-              itemBuilder: (context, index) {
-                return Container(
-                  height: 50,
-                  color: Colors.greenAccent,
-                  margin: EdgeInsets.all(10),
+            padding: const EdgeInsets.fromLTRB(
+              LayoutConstants.pagePadding,
+              0,
+              LayoutConstants.pagePadding,
+              LayoutConstants.pagePadding,
+            ),
+            sliver: Consumer<HomeInfos>(
+              builder: (context, HomeInfos value, __) {
+                final data = value.recomendProduct;
+                if (data == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
+                return ProductsBuilder(
+                  item: data,
+                  loadMore: () {
+                    context.read<HomeInfos>().loadMoreRecomendProduct();
+                  },
                 );
               },
             ),
@@ -344,7 +372,7 @@ class _Action {
   final String text;
   final _ActionType actionType;
 
-  _Action({
+  const _Action({
     required this.text,
     required this.actionType,
   });
@@ -360,10 +388,13 @@ class _Action {
       case _ActionType.comparison:
         return 'productCompare';
       case _ActionType.browse:
+        return 'browseHistory';
       case _ActionType.collection:
+        return 'collection';
       case _ActionType.follow:
+        return 'followFactory';
       case _ActionType.sample:
-        return null;
+        return 'sampleQuote';
     }
   }
 }

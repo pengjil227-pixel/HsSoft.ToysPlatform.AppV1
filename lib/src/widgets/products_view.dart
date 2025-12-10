@@ -71,6 +71,9 @@ class _ProductsViewState extends State<ProductsView> {
           onTap: () {
             context.pushNamed(
               'goodsDetail',
+              pathParameters: {
+                'index': index.toString(),
+              },
               extra: ProductsParameters(
                 products: _products,
                 index: index,
@@ -96,4 +99,16 @@ class SmartRefresherParameter {
   final Future<ApiResponse<PaginatedResponse<ProductItem>>> Function(int page) loadList;
 
   late Function()? loadmore;
+}
+
+class ProductsParameters {
+  ProductsParameters({
+    required this.products,
+    required this.index,
+    required this.loadmore,
+  });
+
+  final List<ProductItem> products;
+  final int index;
+  final Future<bool?> Function() loadmore;
 }
