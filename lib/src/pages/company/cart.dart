@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconfont/iconfont.dart';
 
@@ -140,17 +140,26 @@ class _CartPageState extends State<CartPage> {
     return selected;
   }
 
-  void _showTopTip(String message) {
+void _showTopTip(String message) {
     ScaffoldMessenger.of(context)
       ..removeCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          content: Text(
+            message,
+            textAlign: TextAlign.center, // 文字居中
+            style: const TextStyle(fontSize: 14, color: Colors.white),
+          ),
+          behavior: SnackBarBehavior.floating, // 悬浮样式
+          // 设置固定宽度，或者通过 margin 来控制大小，这里用 width 让它看起来像个小胶囊
+          width: 160, 
+          elevation: 0, // 去掉自带阴影，用背景色看起来更扁平
+          backgroundColor: const Color(0xB3000000), // 半透明黑色背景 (0xB3 = 70% opacity)
           duration: const Duration(seconds: 2),
-          backgroundColor: Colors.black.withValues(alpha: 0.8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          // StadiumBorder 会让两边变成完全圆角（胶囊形）
+          shape: const StadiumBorder(), 
+          // 如果你想调整位置，可以使用 margin (但不能和 width 同时使用，除非 behavior 是 floating)
+          // 这里使用 width + behavior: floating 会自动居中在底部
         ),
       );
   }
@@ -170,13 +179,18 @@ class _CartPageState extends State<CartPage> {
     });
   }
 
-  void _updateProduct(ProductModel product) {
+void _updateProduct(ProductModel product) {
     setState(() {
       _data = _data
           .map((FactoryModel factory) {
-            if (factory.products.contains(product)) {
+            // 修复点：这里不要用 contains(product)，因为对象引用变了。
+            // 而是通过 id 判断这个工厂里是否有这个产品。
+            final bool hasProduct = factory.products.any((p) => p.id == product.id);
+            
+            if (hasProduct) {
               return factory.copyWith(
                 products: factory.products
+                    // 找到对应 ID 的产品并替换
                     .map((ProductModel p) => p.id == product.id ? product : p)
                     .toList(growable: false),
               );
