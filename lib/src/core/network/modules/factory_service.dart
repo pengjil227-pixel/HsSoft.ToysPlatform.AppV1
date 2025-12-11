@@ -5,8 +5,6 @@ import '../../../shared/models/paginated_response.dart';
 import '../../../shared/models/product.dart';
 import '../../../shared/models/source_supplier.dart';
 
-const _baseUrl = 'http://192.168.110.150:8221';
-
 class FactoryService {
   /// 全部源头工厂分页
   static Future<ApiResponse<SourceSupplierPage>> querySourceSupplierPage({
@@ -30,7 +28,6 @@ class FactoryService {
 
     return HttpManager().post(
       '/front/SourceSupplier/QuerySourceSupplierPage',
-      baseUrl: _baseUrl,
       data: body,
       fromJsonT: (data) => SourceSupplierPage.fromJson(data),
     );
@@ -56,7 +53,6 @@ class FactoryService {
 
     return HttpManager().post(
       '/front/SourceSupplier/QueryLatestSupplierPage',
-      baseUrl: _baseUrl,
       data: body,
       fromJsonT: (data) => SourceSupplierPage.fromJson(data),
     );
@@ -82,7 +78,6 @@ class FactoryService {
 
     return HttpManager().post(
       '/front/SourceSupplier/QueryRecommendSupplierPage',
-      baseUrl: _baseUrl,
       data: body,
       fromJsonT: (data) => RecommendSupplierPage.fromJson(data),
     );
@@ -95,7 +90,6 @@ class FactoryService {
   }) {
     return HttpManager().post(
       '/front/SourceSupplier/GetSupplierDetail',
-      baseUrl: _baseUrl,
       data: {
         if (id != null) 'id': id,
         if (supplierNumber != null) 'supplierNumber': supplierNumber,
@@ -110,7 +104,6 @@ class FactoryService {
   }) {
     return HttpManager().post(
       '/front/SourceSupplier/GetSupplierContact',
-      baseUrl: _baseUrl,
       data: {'id': id},
       fromJsonT: (data) => SupplierContact.fromJson(data),
     );
@@ -142,7 +135,6 @@ class FactoryService {
 
     return HttpManager().post(
       '/front/ProductBasic/QuerySupplierDetailProductPage',
-      baseUrl: _baseUrl,
       data: body,
       fromJsonT: (data) => PaginatedResponse<ProductItem>.fromJson(
         data,

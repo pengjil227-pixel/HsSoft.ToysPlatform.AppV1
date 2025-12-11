@@ -3,8 +3,6 @@ import '../../../shared/models/product.dart';
 import '../api_response.dart';
 import '../http_manager.dart';
 
-const _baseUrl = 'http://192.168.110.150:8221';
-
 class SearchService {
   static Future<ApiResponse<PaginatedResponse<ProductItem>>> queryPage(
     dynamic data, {
@@ -12,7 +10,6 @@ class SearchService {
   }) async {
     return HttpManager().post(
       '/front/ProductBasic/QueryPage',
-      baseUrl: _baseUrl,
       data: {
         "page": page,
         "pageSize": 10,
