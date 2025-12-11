@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:flutter_wanhaoniu/src/routes/modules/factory_routes.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,6 +17,9 @@ class AppRouter {
   GoRouter get router {
     return GoRouter(
       initialLocation: initialLocation,
+      observers: <NavigatorObserver>[
+        FlutterSmartDialog.observer,
+      ],
       routes: <RouteBase>[
         ...AppRoutes.routes,
         ...AuthRoutes.routes,

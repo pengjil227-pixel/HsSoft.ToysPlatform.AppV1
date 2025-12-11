@@ -56,3 +56,26 @@ class FactoryModel {
     );
   }
 }
+
+class CartInfo {
+  const CartInfo({
+    required this.id,
+    required this.name,
+    required this.items,
+  });
+
+  final String id;
+  final String name;
+  final List<FactoryModel> items;
+
+  CartInfo copyWith({
+    String? name,
+    List<FactoryModel>? items,
+  }) {
+    return CartInfo(
+      id: id,
+      name: name ?? this.name,
+      items: items ?? this.items,
+    );
+  }
+}

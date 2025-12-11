@@ -1,21 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-class CartItemModel {
-  CartItemModel({
-    required this.id,
-    required this.name,
-    this.count = 0,
-    this.isDefault = false,
-    this.isSelected = false,
-  });
-
-  final int id;
-  String name;
-  int count;
-  bool isDefault;
-  bool isSelected;
-}
+import '../../core/models/cart_models.dart';
+import '../../core/providers/cart_provider.dart';
 
 class CartSettingsPage extends StatefulWidget {
   const CartSettingsPage({super.key});
@@ -25,150 +13,168 @@ class CartSettingsPage extends StatefulWidget {
 }
 
 class _CartSettingsPageState extends State<CartSettingsPage> {
-  // 使用静态数据源，离开页面后也能保留新增的择样车
-  static final List<CartItemModel> _items = <CartItemModel>[
-    CartItemModel(id: 1, name: '择样车名称1 (常规)', count: 8, isDefault: true),
-    CartItemModel(id: 2, name: '这是一个名字非常非常长的择样车名称测试溢出', count: 12),
-    CartItemModel(id: 3, name: '展厅临时车', count: 5),
-  ];
-  static int _nextId = 4;
+  final Set<String> _selectedIds = <String>{};
 
-  void _toggleSelectAll() {
+  void _toggleSelectAll(List<CartInfo> carts) {
     setState(() {
-      final bool isAllSelected = _items.isNotEmpty && _items.every((CartItemModel i) => i.isSelected);
-      for (final CartItemModel item in _items) {
-        item.isSelected = !isAllSelected;
+      if (carts.isEmpty) {
+        _selectedIds.clear();
+        return;
+      }
+      final bool isAllSelected = _selectedIds.length == carts.length;
+      if (isAllSelected) {
+        _selectedIds.clear();
+      } else {
+        _selectedIds
+          ..clear()
+          ..addAll(carts.map((CartInfo c) => c.id));
       }
     });
   }
 
-  void _toggleItemSelection(int index) {
+  void _toggleItemSelection(String id) {
     setState(() {
-      _items[index].isSelected = !_items[index].isSelected;
-    });
-  }
-
-  void _setDefault(int index) {
-    setState(() {
-      for (final CartItemModel item in _items) {
-        item.isDefault = false;
+      if (_selectedIds.contains(id)) {
+        _selectedIds.remove(id);
+      } else {
+        _selectedIds.add(id);
       }
-      _items[index].isDefault = true;
     });
   }
 
-  Future<void> _editCartName(int index) async {
-    if (index < 0 || index >= _items.length || !mounted) return;
+  Future<void> _editCartName(BuildContext context, CartProvider provider, CartInfo cart) async {
     final String? result = await showDialog<String>(
       context: context,
-      builder: (_) => _CartNameDialog(initialName: _items[index].name),
+      builder: (_) => _CartNameDialog(initialName: cart.name),
     );
-    if (!mounted || result == null || result.isEmpty) return;
-    setState(() {
-      _items[index].name = result;
-    });
+    final String? name = result?.trim();
+    if (!mounted || name == null || name.isEmpty) return;
+    provider.updateCartName(cart.id, name);
   }
 
-  Future<void> _addNewCart() async {
-    final CartItemModel newItem = CartItemModel(id: _nextId++, name: '择样车${_items.length + 1}');
-    setState(() {
-      _items.add(newItem);
-    });
-    await _editCartName(_items.length - 1);
+  Future<void> _addNewCart(
+    BuildContext context,
+    CartProvider provider,
+    List<CartInfo> carts,
+  ) async {
+    final String defaultName = '择样车${carts.length + 1}';
+    final String? result = await showDialog<String>(
+      context: context,
+      builder: (_) => _CartNameDialog(initialName: defaultName),
+    );
+    if (!mounted) return;
+    final String name = (result ?? '').trim().isEmpty ? defaultName : result!.trim();
+    provider.createNewCart(name);
   }
 
-  void _deleteSelected() {
-    if (_items.every((CartItemModel i) => !i.isSelected)) return;
-    setState(() {
-      final bool defaultRemoved = _items.any((CartItemModel i) => i.isDefault && i.isSelected);
-      _items.removeWhere((CartItemModel i) => i.isSelected);
-      if (_items.isNotEmpty && defaultRemoved && !_items.any((CartItemModel i) => i.isDefault)) {
-        _items.first.isDefault = true;
-      }
-    });
+  void _deleteSelected(CartProvider provider) {
+    if (_selectedIds.isEmpty) return;
+    provider.removeCarts(_selectedIds.toList());
+    setState(() => _selectedIds.clear());
+  }
+
+  int _calcProductCount(CartInfo cart) {
+    int total = 0;
+    for (final FactoryModel factory in cart.items) {
+      total += factory.products.length;
+    }
+    return total;
   }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final int selectedCount = _items.where((CartItemModel i) => i.isSelected).length;
-    final bool isAllSelected = _items.isNotEmpty && _items.every((CartItemModel i) => i.isSelected);
+    return Consumer<CartProvider>(
+      builder: (BuildContext context, CartProvider cartProvider, _) {
+        final List<CartInfo> carts = cartProvider.cartList;
+        _selectedIds.removeWhere((String id) => !carts.any((CartInfo c) => c.id == id));
+        final int selectedCount = _selectedIds.length;
+        final bool isAllSelected = carts.isNotEmpty && selectedCount == carts.length;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
-          onPressed: () => context.canPop() ? context.pop() : null,
-        ),
-        title: const Text(
-          '管理择样车',
-          style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
-        ),
-        centerTitle: true,
-        actions: [
-          TextButton(
-            onPressed: _addNewCart,
-            child: const Text(
-              '新增',
-              style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w500),
+        return Scaffold(
+          backgroundColor: const Color(0xFFF5F5F5),
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+              onPressed: () => context.canPop() ? context.pop() : null,
             ),
-          ),
-        ],
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        itemCount: _items.length,
-        itemBuilder: (BuildContext context, int index) {
-          return CartItemTile(
-            item: _items[index],
-            onSelectChanged: () => _toggleItemSelection(index),
-            onSetDefault: () => _setDefault(index),
-            onEdit: () => _editCartName(index),
-          );
-        },
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Color(0xFFEEEEEE))),
-        ),
-        child: SafeArea(
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: _toggleSelectAll,
-                child: Row(
-                  children: [
-                    _buildCheckbox(isAllSelected, theme),
-                    const SizedBox(width: 8),
-                    const Text('全选', style: TextStyle(fontSize: 14)),
-                  ],
-                ),
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: selectedCount == 0 ? null : _deleteSelected,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.primaryColor,
-                  disabledBackgroundColor: Colors.grey[300],
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                child: Text(
-                  '批量删除${selectedCount > 0 ? "($selectedCount)" : ""}',
-                  style: const TextStyle(fontSize: 14, color: Colors.white),
+            title: const Text(
+              '管理择样车',
+              style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            centerTitle: true,
+            actions: [
+              TextButton(
+                onPressed: () => _addNewCart(context, cartProvider, carts),
+                child: const Text(
+                  '新增',
+                  style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w500),
                 ),
               ),
             ],
           ),
-        ),
-      ),
+          body: ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            itemCount: carts.length,
+            itemBuilder: (BuildContext context, int index) {
+              final CartInfo cart = carts[index];
+              final bool isDefault = cartProvider.activeCartId == cart.id;
+              final bool isSelected = _selectedIds.contains(cart.id);
+              final int productCount = _calcProductCount(cart);
+              return CartItemTile(
+                cart: cart,
+                isDefault: isDefault,
+                isSelected: isSelected,
+                productCount: productCount,
+                onSelectChanged: () => _toggleItemSelection(cart.id),
+                onSetDefault: () => cartProvider.switchActiveCart(cart.id),
+                onEdit: () => _editCartName(context, cartProvider, cart),
+              );
+            },
+          ),
+          bottomNavigationBar: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              border: Border(top: BorderSide(color: Color(0xFFEEEEEE))),
+            ),
+            child: SafeArea(
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => _toggleSelectAll(carts),
+                    child: Row(
+                      children: [
+                        _buildCheckbox(isAllSelected, theme),
+                        const SizedBox(width: 8),
+                        const Text('全选', style: TextStyle(fontSize: 14)),
+                      ],
+                    ),
+                  ),
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: selectedCount == 0 ? null : () => _deleteSelected(cartProvider),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.primaryColor,
+                      disabledBackgroundColor: Colors.grey[300],
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Text(
+                      '批量删除${selectedCount > 0 ? "($selectedCount)" : ""}',
+                      style: const TextStyle(fontSize: 14, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -192,13 +198,19 @@ class _CartSettingsPageState extends State<CartSettingsPage> {
 class CartItemTile extends StatelessWidget {
   const CartItemTile({
     super.key,
-    required this.item,
+    required this.cart,
+    required this.productCount,
+    required this.isDefault,
+    required this.isSelected,
     required this.onSelectChanged,
     required this.onSetDefault,
     required this.onEdit,
   });
 
-  final CartItemModel item;
+  final CartInfo cart;
+  final int productCount;
+  final bool isDefault;
+  final bool isSelected;
   final VoidCallback onSelectChanged;
   final VoidCallback onSetDefault;
   final VoidCallback onEdit;
@@ -227,12 +239,12 @@ class CartItemTile extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: item.isSelected ? theme.primaryColor : const Color(0xFFCCCCCC),
+                    color: isSelected ? theme.primaryColor : const Color(0xFFCCCCCC),
                     width: 2,
                   ),
-                  color: item.isSelected ? theme.primaryColor : Colors.transparent,
+                  color: isSelected ? theme.primaryColor : Colors.transparent,
                 ),
-                child: item.isSelected ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
+                child: isSelected ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
               ),
             ),
           ),
@@ -244,7 +256,7 @@ class CartItemTile extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        item.name,
+                        cart.name,
                         style: const TextStyle(
                           fontSize: 16,
                           color: Colors.black,
@@ -258,10 +270,10 @@ class CartItemTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '样品数量：${item.count}',
+                  '样品数量：$productCount',
                   style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
                 ),
-                if (item.isDefault) ...[
+                if (isDefault) ...[
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -281,7 +293,7 @@ class CartItemTile extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (!item.isDefault)
+              if (!isDefault)
                 SizedBox(
                   height: 28,
                   child: OutlinedButton(
@@ -296,7 +308,7 @@ class CartItemTile extends StatelessWidget {
                     child: const Text('设为默认', style: TextStyle(fontSize: 12)),
                   ),
                 ),
-              if (!item.isDefault) const SizedBox(width: 8),
+              if (!isDefault) const SizedBox(width: 8),
               SizedBox(
                 height: 28,
                 child: OutlinedButton(

@@ -3,10 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:iconfont/iconfont.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/providers/cart_provider.dart';
 import '../../../core/network/modules/factory_service.dart';
 import '../../../core/providers/goods_detail_info.dart';
 import '../../../shared/models/product.dart';
 import '../../../shared/models/source_supplier.dart';
+import '../../../utils/toast_utils.dart';
 import '../../../widgets/goods_item.dart';
 import '../../../widgets/products_view.dart';
 import 'widgets/contact_dialog.dart';
@@ -109,6 +111,12 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _addToCart(ProductItem item) async {
+    await context.read<CartProvider>().addToCart(item);
+    if (!mounted) return;
+    ToastUtils.showSuccess(context);
   }
 
   @override
@@ -242,7 +250,7 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
                         child: GoodsItem(
                           item: item,
                           showActionButton: true,
-                          onActionTap: openDetail,
+                          onActionTap: () => _addToCart(item),
                           backgroundColor: const Color(0xFFF4F4F4),
                           imagePadding: const EdgeInsets.fromLTRB(3, 3, 3, 0),
                           imageOuterPadding: const EdgeInsets.fromLTRB(3, 3, 3, 0),
@@ -505,7 +513,7 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
       child: GoodsItem(
         item: item,
         showActionButton: true,
-        onActionTap: openDetail,
+        onActionTap: () => _addToCart(item),
         backgroundColor: const Color(0xFFF4F4F4),
         imagePadding: const EdgeInsets.fromLTRB(3, 3, 3, 0),
         imageOuterPadding: const EdgeInsets.fromLTRB(3, 3, 3, 0),

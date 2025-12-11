@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/models/cart_models.dart';
 import '../../core/providers/cart_provider.dart';
+import '../../utils/toast_utils.dart';
 import 'my/sample_quote_state.dart';
 
 class CartPage extends StatefulWidget {
@@ -28,26 +29,11 @@ class _CartPageState extends State<CartPage> {
     });
   }
 
-  void _showTopTip(String message) {
-    ScaffoldMessenger.of(context)
-      ..removeCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          duration: const Duration(seconds: 2),
-          backgroundColor: Colors.black.withValues(alpha: 0.8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
-  }
-
   @override
   Widget build(BuildContext context) {
     final CartProvider cart = context.watch<CartProvider>();
-    final bool isAllSelected =
-        cart.factories.isNotEmpty && cart.factories.every((FactoryModel f) => f.isSelected);
+    final List<FactoryModel> factories = cart.activeCart.items;
+    final bool isAllSelected = factories.isNotEmpty && factories.every((FactoryModel f) => f.isSelected);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -63,7 +49,7 @@ class _CartPageState extends State<CartPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '择样车(${cart.factories.length})',
+                '${cart.activeCart.name}(${factories.length})',
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 18,
@@ -113,9 +99,9 @@ class _CartPageState extends State<CartPage> {
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: cart.factories.length,
+                    itemCount: factories.length,
                     itemBuilder: (BuildContext context, int index) {
-                      final FactoryModel factory = cart.factories[index];
+                      final FactoryModel factory = factories[index];
                       return FactoryGroupTile(
                         factoryModel: factory,
                         isManageMode: _isManageMode,
@@ -230,7 +216,7 @@ class _CartPageState extends State<CartPage> {
                       onPressed: () {
                         final List<QuoteProductInput> selectedProducts = _collectSelectedProducts();
                         if (selectedProducts.isEmpty) {
-                          _showTopTip('请选择产品');
+                          ToastUtils.showWarning('请先选择商品');
                           return;
                         }
                         context.pushNamed('sampleQuoteCreate', extra: selectedProducts);
@@ -256,7 +242,7 @@ class _CartPageState extends State<CartPage> {
   List<QuoteProductInput> _collectSelectedProducts() {
     final CartProvider cart = context.read<CartProvider>();
     final List<QuoteProductInput> selected = <QuoteProductInput>[];
-    for (final FactoryModel factory in cart.factories) {
+    for (final FactoryModel factory in cart.activeCart.items) {
       for (final ProductModel product in factory.products) {
         if (product.isSelected) {
           selected.add(
@@ -513,9 +499,12 @@ class QuantityControl extends StatelessWidget {
           Container(
             constraints: const BoxConstraints(minWidth: 26),
             alignment: Alignment.center,
-            child: Text(
-              '$quantity',
-              style: const TextStyle(fontSize: 12, color: Color(0xFF333333)),
+            child: GestureDetector(
+              onTap: () => _editQuantity(context),
+              child: Text(
+                '$quantity',
+                style: const TextStyle(fontSize: 12, color: Color(0xFF333333)),
+              ),
             ),
           ),
           Container(width: 1, height: 14, color: const Color(0xFFEEEEEE)),
@@ -523,6 +512,44 @@ class QuantityControl extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _editQuantity(BuildContext context) async {
+    final TextEditingController controller = TextEditingController(text: '$quantity');
+    final int? result = await showDialog<int>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('修改数量'),
+          content: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              hintText: '请输入数量',
+              border: OutlineInputBorder(),
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                final int? value = int.tryParse(controller.text);
+                Navigator.of(context).pop(value);
+              },
+              child: const Text('确定'),
+            ),
+          ],
+        );
+      },
+    );
+    controller.dispose();
+    if (result != null && result > 0) {
+      onChanged(result);
+    }
   }
 
   Widget _buildBtn(IconData icon, VoidCallback? onTap) {

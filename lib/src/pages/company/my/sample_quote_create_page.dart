@@ -21,8 +21,8 @@ class _SampleQuoteCreatePageState extends State<SampleQuoteCreatePage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _salesPersonController = TextEditingController();
   final TextEditingController _customerController = TextEditingController();
-  final TextEditingController _profitRateController = TextEditingController(text: '0.00');
-  final TextEditingController _exchangeRateController = TextEditingController(text: '1.0');
+  final TextEditingController _profitRateController = TextEditingController();
+  final TextEditingController _exchangeRateController = TextEditingController();
   final TextEditingController _decimalPlacesController = TextEditingController(text: '2');
 
   final ValueNotifier<bool> _isQuickFormulaNotifier = ValueNotifier<bool>(true);
@@ -263,6 +263,7 @@ class _FormulaSection extends StatelessWidget {
           label: '利润率（%）',
           controller: profitRateController,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          hintText: '0.00',
         ),
         const _RowDivider(),
         const _ReadonlyRow(label: '币种', value: 'RMB'),
@@ -271,6 +272,7 @@ class _FormulaSection extends StatelessWidget {
           label: '汇率',
           controller: exchangeRateController,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          hintText: '1.0',
         ),
         const _RowDivider(),
         _NumberInputRow(
@@ -403,11 +405,13 @@ class _NumberInputRow extends StatelessWidget {
     required this.label,
     required this.controller,
     required this.keyboardType,
+    this.hintText,
   });
 
   final String label;
   final TextEditingController controller;
   final TextInputType keyboardType;
+  final String? hintText;
 
   @override
   Widget build(BuildContext context) {
@@ -422,9 +426,14 @@ class _NumberInputRow extends StatelessWidget {
             child: TextFormField(
               controller: controller,
               keyboardType: keyboardType,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
+                hintText: hintText,
+                hintStyle: const TextStyle(
+                  color: Color(0xFFB0B0B0),
+                  fontSize: 14,
+                ),
               ),
               textAlign: TextAlign.right,
             ),

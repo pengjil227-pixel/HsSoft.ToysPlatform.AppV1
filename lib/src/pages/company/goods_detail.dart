@@ -6,12 +6,15 @@ import 'package:flutter_wanhaoniu/src/widgets/primart_button.dart';
 import 'package:flutter_wanhaoniu/src/widgets/user_tile.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconfont/iconfont.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
+import '../../core/providers/cart_provider.dart';
 import '../../core/network/modules/company.dart';
 import '../../core/network/modules/product_detail.dart';
 import '../../shared/models/product.dart';
 import '../../shared/models/product_detail.dart';
+import '../../utils/toast_utils.dart';
 import '../../widgets/custom_smart_refresher.dart';
 import '../../widgets/custom_swiper.dart';
 import '../../widgets/custom_title.dart';
@@ -751,13 +754,10 @@ class __DetailItemState extends State<_DetailItem> {
                         padding: EdgeInsets.only(left: 20),
                         child: PrimartButton(
                           color: theme.primaryColor,
-                          onPressed: () {
-                            // context.pushNamed(
-                            //   'goodsDetail',
-                            //   pathParameters: {
-                            //     'index': '9',
-                            //   },
-                            // );
+                          onPressed: () async {
+                            await context.read<CartProvider>().addToCart(_info);
+                            if (!mounted) return;
+                            ToastUtils.showSuccess(context);
                           },
                           child: Text(
                             '加入购物车',
