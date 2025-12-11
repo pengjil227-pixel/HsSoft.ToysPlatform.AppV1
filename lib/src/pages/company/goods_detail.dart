@@ -14,6 +14,7 @@ import '../../shared/models/product.dart';
 import '../../shared/models/product_detail.dart';
 import '../../widgets/custom_smart_refresher.dart';
 import '../../widgets/custom_swiper.dart';
+import '../../widgets/custom_title.dart';
 import '../../widgets/goods_item.dart';
 import '../../widgets/products_view.dart';
 
@@ -546,34 +547,7 @@ class __DetailItemState extends State<_DetailItem> {
                           children: [
                             Row(
                               children: [
-                                Stack(
-                                  children: [
-                                    Text(
-                                      '产品信息',
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, height: 1.2),
-                                    ),
-                                    Positioned(
-                                      right: 0,
-                                      bottom: 0,
-                                      left: 0,
-                                      child: Container(
-                                        height: 6,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(100),
-                                          gradient: LinearGradient(
-                                            begin: Alignment.centerLeft,
-                                            end: Alignment.centerRight,
-                                            stops: [0.0, 1.0],
-                                            colors: [
-                                              Color(0xFFF30213).withAlpha(160),
-                                              Colors.white.withAlpha(100),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                CustomTitle(title: '产品信息'),
                                 PrimartButton(
                                   onPressed: () {},
                                   child: Icon(
@@ -618,7 +592,13 @@ class __DetailItemState extends State<_DetailItem> {
                         ),
                         title: Text('耀昇玩具展厅'),
                         subtitle: Row(
-                          children: [Text('关注: '), Text('99', style: TextStyle(color: Color(0xFF111111)),)],
+                          children: [
+                            Text('关注: '),
+                            Text(
+                              '99',
+                              style: TextStyle(color: Color(0xFF111111)),
+                            )
+                          ],
                         ),
                         trailing: Column(
                           mainAxisSize: MainAxisSize.min,

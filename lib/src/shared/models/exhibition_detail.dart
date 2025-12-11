@@ -17,7 +17,7 @@ class ExhibitionDetailInfo {
     required this.supplierCount,
     required this.environUrls,
   });
-  
+
   final int id;
   final String companyName;
   final String companyNumber;
@@ -49,14 +49,10 @@ class ExhibitionDetailInfo {
       address: json['address'] as String? ?? '',
       productCount: json['productCount'] as int? ?? 0,
       videoUrl: json['videoUrl'] as String? ?? '',
-      openDate: json['openDate'] != null 
-          ? DateTime.parse(json['openDate'] as String)
-          : DateTime.now(),
+      openDate: json['openDate'] != null ? DateTime.parse(json['openDate'] as String) : DateTime.now(),
       landArea: (json['landArea'] as num?)?.toDouble() ?? 0.0,
       supplierCount: json['supplierCount'] as int? ?? 0,
-      environUrls: json['environUrls'] != null
-          ? List<String>.from(json['environUrls'] as List)
-          : <String>[],
+      environUrls: json['environUrls'] != null ? List<String>.from(json['environUrls'] as List) : <String>[],
     );
   }
 
@@ -78,6 +74,38 @@ class ExhibitionDetailInfo {
     data['landArea'] = landArea;
     data['supplierCount'] = supplierCount;
     data['environUrls'] = environUrls;
+    return data;
+  }
+}
+
+class ExhibitionSupplier {
+  ExhibitionSupplier({
+    required this.id,
+    required this.companyNumber,
+    required this.companyName,
+    required this.companyLogo,
+  });
+
+  final int id;
+  final String companyNumber;
+  final String companyName;
+  final String companyLogo;
+
+  factory ExhibitionSupplier.fromJson(Map<String, dynamic> json) {
+    return ExhibitionSupplier(
+      id: json['id'],
+      companyNumber: json['companyNumber'],
+      companyName: json['companyName'],
+      companyLogo: json['companyLogo'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['companyNumber'] = companyNumber;
+    data['companyName'] = companyName;
+    data['companyLogo'] = companyLogo;
     return data;
   }
 }

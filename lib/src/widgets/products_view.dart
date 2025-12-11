@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_wanhaoniu/src/widgets/goods_item.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/constants/layout_constants.dart';
@@ -29,6 +28,14 @@ class _ProductsViewState extends State<ProductsView> {
   void initState() {
     super.initState();
     widget.parameter.loadmore = _loadList;
+    widget.parameter.refresh = _refresh;
+    _loadList();
+  }
+
+  void _refresh() {
+    _page = 1;
+    _canload = true;
+    _products.clear();
     _loadList();
   }
 
@@ -95,10 +102,13 @@ class SmartRefresherParameter {
   SmartRefresherParameter({
     required this.loadList,
     this.loadmore,
+    this.refresh,
   });
   final Future<ApiResponse<PaginatedResponse<ProductItem>>> Function(int page) loadList;
 
   late Function()? loadmore;
+
+  late Function()? refresh;
 }
 
 class ProductsParameters {

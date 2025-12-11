@@ -421,6 +421,10 @@ class __RecommendedPageState extends State<_RecommendedPage> {
       context.read<HomeInfos>().updateHomeInfos(),
       Future.delayed(Duration(milliseconds: 500)),
     ]);
+
+    _refreshController.loadComplete();
+    _smartRefresherParameter.refresh?.call();
+
     _refreshController.refreshCompleted();
   }
 

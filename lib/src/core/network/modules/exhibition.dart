@@ -4,7 +4,6 @@ import '../../../shared/models/paginated_response.dart';
 import '../api_response.dart';
 import '../http_manager.dart';
 
-
 class ExhibitionService {
   static Future<ApiResponse<List<ExhibitionInfo>>> getOnlineExhibitionList() async {
     return HttpManager().post(
