@@ -54,7 +54,7 @@ class _SampleQuoteCreatePageState extends State<SampleQuoteCreatePage> {
     final double profit = double.tryParse(_profitRateController.text) ?? 0;
     final double exchangeRate = double.tryParse(_exchangeRateController.text) ?? 1;
     final int decimalPlaces = int.tryParse(_decimalPlacesController.text) ?? 2;
-    final double raw = (_selectedProductsTotal * (1 - profit / 100)) / (exchangeRate == 0 ? 1 : exchangeRate);
+    final double raw = (_selectedProductsTotal * (1 + profit / 100)) / (exchangeRate == 0 ? 1 : exchangeRate);
     final int safeDecimals = decimalPlaces.clamp(0, 6).toInt();
     return double.parse(raw.toStringAsFixed(safeDecimals));
   }
@@ -551,7 +551,7 @@ class _FormulaDescriptionRow extends StatelessWidget {
         children: [
           Text('计算公式', style: TextStyle(fontSize: 14, color: Color(0xFF333333))),
           Text(
-            '出厂价*(1-报价利润%)/汇率',
+            '出厂价*(1+报价利润%)/汇率',
             style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
           ),
         ],

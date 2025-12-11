@@ -8,6 +8,7 @@ import '../../../core/providers/goods_detail_info.dart';
 import '../../../shared/models/product.dart';
 import '../../../shared/models/source_supplier.dart';
 import '../../../widgets/goods_item.dart';
+import '../../../widgets/products_view.dart';
 import 'widgets/contact_dialog.dart';
 
 class FactoryDetailPage extends StatefulWidget {
@@ -226,14 +227,15 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
                     itemBuilder: (context, index) {
                       final item = _recommendProducts[index];
                       void openDetail() {
-                        // final goodsDetailInfo = context.read<GoodsDetailInfo>();
-                        // goodsDetailInfo.products = _recommendProducts;
-                        // goodsDetailInfo.currentIndex = index;
-
-                        // context.pushNamed(
-                        //   'goodsDetail',
-                        //   pathParameters: {'index': index.toString()},
-                        // );
+                        context.pushNamed(
+                          'goodsDetail',
+                          pathParameters: {'index': index.toString()},
+                          extra: ProductsParameters(
+                            products: _recommendProducts,
+                            index: index,
+                            loadmore: () async => false,
+                          ),
+                        );
                       }
                       return GestureDetector(
                         onTap: openDetail,
@@ -487,10 +489,15 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
 
   Widget _buildGoodsItemCard(ProductItem item, int indexInList) {
     void openDetail() {
-      // final goodsDetailInfo = context.read<GoodsDetailInfo>();
-      // goodsDetailInfo.products = _latestProducts;
-      // goodsDetailInfo.currentIndex = indexInList;
-      // context.pushNamed('goodsDetail', pathParameters: {'index': indexInList.toString()});
+      context.pushNamed(
+        'goodsDetail',
+        pathParameters: {'index': indexInList.toString()},
+        extra: ProductsParameters(
+          products: _latestProducts,
+          index: indexInList,
+          loadmore: () async => false,
+        ),
+      );
     }
 
     return GestureDetector(

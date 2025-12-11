@@ -83,7 +83,7 @@ class _QuoteDetailContent extends StatelessWidget {
               const _SectionDivider(),
               const _DetailRow(
                 label: '报价公式',
-                value: '出厂价*(1-报价利润%)/汇率',
+                value: '出厂价*(1+报价利润%)/汇率',
               ),
             ],
           ),
