@@ -114,9 +114,17 @@ class _FactoryDetailPageState extends State<FactoryDetailPage> {
   }
 
   Future<void> _addToCart(ProductItem item) async {
-    await context.read<CartProvider>().addToCart(item);
+    final provider = context.read<CartProvider>();
+    await provider.addToCart(item);
+
     if (!mounted) return;
-    ToastUtils.showSuccess(context);
+
+    // 修复：增加错误判断
+    if (provider.error == null) {
+      ToastUtils.showSuccess(context);
+    } else {
+      ToastUtils.showWarning(provider.error ?? '加入失败');
+    }
   }
 
   @override
