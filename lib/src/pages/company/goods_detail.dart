@@ -135,7 +135,6 @@ class _GoodsInfoWidget extends StatefulWidget {
     required this.parameters,
     required this.onScroll,
   });
-
   final ValueNotifier<double> alpha;
 
   final ProductsParameters parameters;
@@ -151,8 +150,7 @@ class __GoodsInfoWidgetState extends State<_GoodsInfoWidget> {
   late final List<ProductItem> _products;
   late int _current;
 
-  final ValueNotifier<ProductDetail?> _productDetail =
-      ValueNotifier<ProductDetail?>(null);
+  final ValueNotifier<ProductDetail?> _productDetail = ValueNotifier<ProductDetail?>(null);
 
   @override
   void initState() {
@@ -334,8 +332,7 @@ class _AppBar extends StatelessWidget {
             width: 30,
             height: 30,
             decoration: BoxDecoration(
-              color: Colors.black
-                  .withAlpha(((1 - alpha) * 130).toInt().clamp(0, 130)),
+              color: Colors.black.withAlpha(((1 - alpha) * 130).toInt().clamp(0, 130)),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Icon(
@@ -357,7 +354,6 @@ class _DetailItem extends StatefulWidget {
     this.productDetail,
     required this.productInfo,
   });
-
   final ValueNotifier<double> alpha;
 
   final Function(double value) onScroll;
@@ -372,9 +368,7 @@ class _DetailItem extends StatefulWidget {
 
 class __DetailItemState extends State<_DetailItem> {
   final RefreshController _refreshController = RefreshController();
-
   ProductDetail? get _product => widget.productDetail;
-
   ProductItem get _info => widget.productInfo;
 
   final List<String> _actions = ['切换英文', '复制信息', '错误反馈', '加入对比'];
@@ -394,8 +388,7 @@ class __DetailItemState extends State<_DetailItem> {
     super.initState();
     _controller.addListener(_controllerListener);
     _smartRefresherParameter = SmartRefresherParameter(
-      loadList: (int page) =>
-          ProductDetailService.queryDetailRecommendProductPage(page),
+      loadList: (int page) => ProductDetailService.queryDetailRecommendProductPage(page),
     );
   }
 
@@ -454,11 +447,7 @@ class __DetailItemState extends State<_DetailItem> {
     return Stack(
       children: [
         Padding(
-          padding: EdgeInsets.only(
-              bottom: LayoutConstants.pagePadding * 2 +
-                  View.of(context).padding.bottom /
-                      View.of(context).devicePixelRatio +
-                  _bottomHeight),
+          padding: EdgeInsets.only(bottom: LayoutConstants.pagePadding * 2 + View.of(context).padding.bottom / View.of(context).devicePixelRatio + _bottomHeight),
           child: SmartRefresher(
             enablePullDown: false,
             enablePullUp: true,
@@ -481,16 +470,14 @@ class __DetailItemState extends State<_DetailItem> {
                             itemBuilder: (BuildContext context, int index) {
                               return CachedNetworkImage(
                                 imageUrl: _product!.imgList[index].filePath,
-                                errorWidget: (context, url, error) =>
-                                    Icon(Icons.error),
+                                errorWidget: (context, url, error) => Icon(Icons.error),
                                 fit: BoxFit.cover,
                               );
                             },
                           )
                         : CachedNetworkImage(
                             imageUrl: _info.imgUrl,
-                            errorWidget: (context, url, error) =>
-                                Icon(Icons.error),
+                            errorWidget: (context, url, error) => Icon(Icons.error),
                             fit: BoxFit.cover,
                           ),
                   ),
@@ -504,13 +491,11 @@ class __DetailItemState extends State<_DetailItem> {
                       children: [
                         Text(
                           _info.maNa,
-                          style: TextStyle(
-                              fontSize: 17, fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                         ),
                         Text(
                           '¥${_info.faPr}',
-                          style:
-                              TextStyle(fontSize: 24, color: Color(0xFFF30213)),
+                          style: TextStyle(fontSize: 24, color: Color(0xFFF30213)),
                         ),
                         if (hasDetail)
                           Container(
@@ -553,19 +538,14 @@ class __DetailItemState extends State<_DetailItem> {
                 if (hasDetail)
                   SliverToBoxAdapter(
                     child: Container(
-                      margin: EdgeInsets.fromLTRB(
-                          LayoutConstants.pagePadding,
-                          LayoutConstants.pagePadding,
-                          LayoutConstants.pagePadding,
-                          0),
+                      margin: EdgeInsets.fromLTRB(LayoutConstants.pagePadding, LayoutConstants.pagePadding, LayoutConstants.pagePadding, 0),
                       padding: EdgeInsets.all(LayoutConstants.pagePadding),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                       child: DefaultTextStyle(
-                        style:
-                            TextStyle(fontSize: 15, color: Color(0xFF111111)),
+                        style: TextStyle(fontSize: 15, color: Color(0xFF111111)),
                         child: Column(
                           children: [
                             Row(
@@ -584,15 +564,11 @@ class __DetailItemState extends State<_DetailItem> {
                             _detaiBuilder('来源展厅', _product!.exhibitionName),
                             _detaiBuilder('包装', _product!.chPa),
                             _detaiBuilder('种类名称', _product!.clNa),
-                            _detaiBuilder('外箱规格',
-                                '${_product!.inLe}x${_product!.inWi}x${_product!.inHi}(cm)'),
-                            _detaiBuilder(
-                                '装箱量', '${_product!.attestationCount}'),
-                            _detaiBuilder('外箱规格',
-                                '${_product!.ouLe}x${_product!.ouWi}x${_product!.ouHi}(cm)'),
+                            _detaiBuilder('外箱规格', '${_product!.inLe}x${_product!.inWi}x${_product!.inHi}(cm)'),
+                            _detaiBuilder('装箱量', '${_product!.attestationCount}'),
+                            _detaiBuilder('外箱规格', '${_product!.ouLe}x${_product!.ouWi}x${_product!.ouHi}(cm)'),
                             _detaiBuilder('毛重/净重', '${_product!.neWePr}'),
-                            _detaiBuilder('体积/材积',
-                                '${_product!.prLe}x${_product!.prWi}x${_product!.prHi}(cm)'),
+                            _detaiBuilder('体积/材积', '${_product!.prLe}x${_product!.prWi}x${_product!.prHi}(cm)'),
                             _detaiBuilder('更新时间', _product!.createdTime),
                             _detaiBuilder('上架时间', _product!.updatedTime),
                           ],
@@ -636,23 +612,19 @@ class __DetailItemState extends State<_DetailItem> {
                               sizeStyle: CupertinoButtonSize.small,
                               onPressed: () {},
                               child: Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 5),
+                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                 decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1, color: Color(0xFFF30213)),
+                                  border: Border.all(width: 1, color: Color(0xFFF30213)),
                                   borderRadius: BorderRadius.circular(4.0),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Iconfont.guanzhuchangshang,
-                                        color: Color(0xFFF30213)),
+                                    Icon(Iconfont.guanzhuchangshang, color: Color(0xFFF30213)),
                                     SizedBox(width: 4),
                                     Text(
                                       '联系',
-                                      style: TextStyle(
-                                          color: Color(0xFFF30213), height: 1),
+                                      style: TextStyle(color: Color(0xFFF30213), height: 1),
                                     ),
                                   ],
                                 ),
@@ -665,23 +637,19 @@ class __DetailItemState extends State<_DetailItem> {
                               sizeStyle: CupertinoButtonSize.small,
                               onPressed: () {},
                               child: Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 5),
+                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                 decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 1, color: Color(0xFFFF9700)),
+                                  border: Border.all(width: 1, color: Color(0xFFFF9700)),
                                   borderRadius: BorderRadius.circular(4.0),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Iconfont.lianxiwomen,
-                                        color: Color(0xFFFF9700)),
+                                    Icon(Iconfont.lianxiwomen, color: Color(0xFFFF9700)),
                                     SizedBox(width: 4),
                                     Text(
                                       '联系',
-                                      style: TextStyle(
-                                          color: Color(0xFFFF9700), height: 1),
+                                      style: TextStyle(color: Color(0xFFFF9700), height: 1),
                                     ),
                                   ],
                                 ),
@@ -707,11 +675,8 @@ class __DetailItemState extends State<_DetailItem> {
           valueListenable: widget.alpha,
           builder: (_, double value, __) {
             return Container(
-              color: Colors.white
-                  .withAlpha((_alpha ?? value * 255).toInt().clamp(0, 255)),
-              height: View.of(context).padding.top /
-                      View.of(context).devicePixelRatio +
-                  (theme.appBarTheme.toolbarHeight ?? 44),
+              color: Colors.white.withAlpha((_alpha ?? value * 255).toInt().clamp(0, 255)),
+              height: View.of(context).padding.top / View.of(context).devicePixelRatio + (theme.appBarTheme.toolbarHeight ?? 44),
             );
           },
         ),
@@ -722,13 +687,7 @@ class __DetailItemState extends State<_DetailItem> {
             left: 0,
             child: Container(
               color: Colors.white,
-              padding: EdgeInsets.fromLTRB(
-                  4,
-                  LayoutConstants.pagePadding,
-                  8,
-                  LayoutConstants.pagePadding +
-                      View.of(context).padding.bottom /
-                          View.of(context).devicePixelRatio),
+              padding: EdgeInsets.fromLTRB(4, LayoutConstants.pagePadding, 8, LayoutConstants.pagePadding + View.of(context).padding.bottom / View.of(context).devicePixelRatio),
               child: SizedBox(
                 height: _bottomHeight,
                 child: Row(
@@ -747,8 +706,7 @@ class __DetailItemState extends State<_DetailItem> {
                           SizedBox(height: 4),
                           Text(
                             '店铺',
-                            style: TextStyle(
-                                fontSize: 12, color: Color(0xFF929292)),
+                            style: TextStyle(fontSize: 12, color: Color(0xFF929292)),
                           ),
                         ],
                       ),
@@ -767,8 +725,7 @@ class __DetailItemState extends State<_DetailItem> {
                           SizedBox(height: 4),
                           Text(
                             '收藏',
-                            style: TextStyle(
-                                fontSize: 12, color: Color(0xFF929292)),
+                            style: TextStyle(fontSize: 12, color: Color(0xFF929292)),
                           ),
                         ],
                       ),
@@ -787,8 +744,7 @@ class __DetailItemState extends State<_DetailItem> {
                           SizedBox(height: 4),
                           Text(
                             '店铺',
-                            style: TextStyle(
-                                fontSize: 12, color: Color(0xFF929292)),
+                            style: TextStyle(fontSize: 12, color: Color(0xFF929292)),
                           ),
                         ],
                       ),
@@ -799,10 +755,18 @@ class __DetailItemState extends State<_DetailItem> {
                         child: PrimartButton(
                           color: theme.primaryColor,
                           onPressed: () async {
-                            await context.read<CartProvider>().addToCart(_info);
-                            if (!mounted) return;
-                            ToastUtils.showSuccess(context);
-                          },
+                           final provider = context.read<CartProvider>();
+                              await provider.addToCart(_info);
+  
+                                 if (!context.mounted) return;
+  
+                              // 修复：只有无错误时才弹成功提示，否则弹警告
+                               if (provider.error == null) {
+                                      ToastUtils.showSuccess(context);
+                                  } else {
+                                    ToastUtils.showWarning(provider.error ?? '加入失败');
+  }
+},
                           child: Text(
                             '加入购物车',
                             style: TextStyle(color: Colors.white),

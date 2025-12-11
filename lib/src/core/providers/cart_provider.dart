@@ -50,6 +50,28 @@ class CartProvider extends ChangeNotifier {
   int get totalBoxes => selectedCount;
   int get totalPieces => selectedCount;
 
+  Future<void> refreshCartList() => fetchCartList();
+
+  Future<void> fetchCartList() async {
+    _setLoading(true);
+    try {
+      final response = await CartService.queryPage();
+      final List<CartProductEntity> entities = response.data ?? <CartProductEntity>[];
+      final List<FactoryModel> grouped = _groupBySupplier(entities);
+      _error = null;
+      _ensureDefaultCart();
+      final int activeIndex = _activeCartIndex;
+      if (activeIndex != -1) {
+        _carts[activeIndex] = _carts[activeIndex].copyWith(items: grouped);
+      }
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   CartInfo createNewCart(String name) {
     final CartInfo newCart = CartInfo(
       id: _generateCartId(),
@@ -92,71 +114,12 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> refreshCartList() async {
-    _setLoading(true);
-    try {
-      final List<FactoryModel> remoteData = await CartService.fetchCartListApi();
-      _error = null;
-      _ensureDefaultCart();
-      final int activeIndex = _activeCartIndex;
-      if (activeIndex != -1) {
-        _carts[activeIndex] = _carts[activeIndex].copyWith(items: remoteData);
-      } else if (_carts.isNotEmpty) {
-        _activeCartId = _carts.first.id;
-        _carts[0] = _carts[0].copyWith(items: remoteData);
-      }
-      notifyListeners();
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _setLoading(false);
-    }
-  }
-
   Future<void> addToCart(ProductItem product) async {
-    _setLoading(true);
     try {
-      final bool ok = await CartService.addToCartApi(product.productNumber, 1);
-      if (!ok) {
-        _error = '加入失败';
-        return;
-      }
-      _error = null;
-      _ensureDefaultCart();
-      final List<FactoryModel> factories = List<FactoryModel>.from(activeCart.items);
-      final ProductModel mapped = _mapProduct(product).copyWith(isSelected: true);
-      final String factoryId =
-          product.supplierNumber.isNotEmpty ? product.supplierNumber : (mapped.id.isNotEmpty ? mapped.id : 'factory');
-      final String factoryName = product.maNa.isNotEmpty ? product.maNa : '厂商';
-      final int factoryIndex = factories.indexWhere((FactoryModel f) => f.id == factoryId);
-      if (factoryIndex == -1) {
-        factories.add(
-          FactoryModel(
-            id: factoryId,
-            name: factoryName,
-            products: <ProductModel>[mapped],
-          ),
-        );
-      } else {
-        final FactoryModel factory = factories[factoryIndex];
-        final int productIndex = factory.products.indexWhere((ProductModel p) => p.id == mapped.id);
-        if (productIndex == -1) {
-          final List<ProductModel> updatedProducts = List<ProductModel>.from(factory.products)..add(mapped);
-          factories[factoryIndex] = factory.copyWith(products: updatedProducts);
-        } else {
-          final ProductModel existing = factory.products[productIndex];
-          final ProductModel merged =
-              existing.copyWith(quantity: existing.quantity + mapped.quantity, isSelected: true);
-          final List<ProductModel> updatedProducts = List<ProductModel>.from(factory.products);
-          updatedProducts[productIndex] = merged;
-          factories[factoryIndex] = factory.copyWith(products: updatedProducts);
-        }
-      }
-      _replaceActiveCartItems(factories);
+      await CartService.addProduct(productNumber: product.productNumber);
+      await fetchCartList();
     } catch (e) {
       _error = e.toString();
-    } finally {
-      _setLoading(false);
     }
   }
 
@@ -206,39 +169,122 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  void updateQuantity(String productId, int quantity) {
-    _ensureDefaultCart();
-    final List<FactoryModel> factories = List<FactoryModel>.from(activeCart.items);
-    for (int fIndex = 0; fIndex < factories.length; fIndex++) {
-      final FactoryModel factory = factories[fIndex];
-      final int pIndex = factory.products.indexWhere((ProductModel p) => p.id == productId);
-      if (pIndex != -1) {
-        final ProductModel product = factory.products[pIndex];
-        final ProductModel updated = product.copyWith(quantity: quantity);
-        final List<ProductModel> updatedProducts = List<ProductModel>.from(factory.products);
-        updatedProducts[pIndex] = updated;
-        factories[fIndex] = factory.copyWith(products: updatedProducts);
-        _replaceActiveCartItems(factories);
-        return;
+  Future<void> updateQuantity(String productId, int quantity) async {
+    final int? recordId = int.tryParse(productId);
+    if (recordId == null) return;
+    _setLoading(true);
+    try {
+      await CartService.updateQuantity(id: recordId, boxNumber: quantity);
+      _ensureDefaultCart();
+      final List<FactoryModel> factories = List<FactoryModel>.from(activeCart.items);
+      for (int fIndex = 0; fIndex < factories.length; fIndex++) {
+        final FactoryModel factory = factories[fIndex];
+        final int pIndex = factory.products.indexWhere((ProductModel p) => p.id == productId);
+        if (pIndex != -1) {
+          final ProductModel product = factory.products[pIndex];
+          final ProductModel updated = product.copyWith(quantity: quantity);
+          final List<ProductModel> updatedProducts = List<ProductModel>.from(factory.products);
+          updatedProducts[pIndex] = updated;
+          factories[fIndex] = factory.copyWith(products: updatedProducts);
+          _replaceActiveCartItems(factories);
+          break;
+        }
       }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _setLoading(false);
     }
   }
 
-  ProductModel _mapProduct(ProductItem product) {
-    return ProductModel(
-      id: product.productNumber,
-      name: product.prNa,
-      sku: product.faNo,
-      price: product.faPr,
-      imageUrl: product.imgUrl,
-      quantity: 1,
-      isSelected: true,
-    );
+  Future<void> deleteProducts(List<String> productIds) async {
+    if (productIds.isEmpty) return;
+    final List<int> ids = productIds.map(int.tryParse).whereType<int>().toList();
+    if (ids.isEmpty) return;
+    _setLoading(true);
+    try {
+      await CartService.batchDelete(ids: ids);
+      _ensureDefaultCart();
+      final List<FactoryModel> factories = List<FactoryModel>.from(activeCart.items);
+      for (int i = factories.length - 1; i >= 0; i--) {
+        final FactoryModel factory = factories[i];
+        final List<ProductModel> remaining =
+            factory.products.where((ProductModel p) => !productIds.contains(p.id)).toList();
+        if (remaining.isEmpty) {
+          factories.removeAt(i);
+        } else {
+          factories[i] = factory.copyWith(products: remaining);
+        }
+      }
+      _replaceActiveCartItems(factories);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> deleteProduct(String productId) async {
+    final int? id = int.tryParse(productId);
+    if (id == null) return;
+    _setLoading(true);
+    try {
+      await CartService.deleteItem(id: id);
+      _ensureDefaultCart();
+      final List<FactoryModel> factories = List<FactoryModel>.from(activeCart.items);
+      for (int i = factories.length - 1; i >= 0; i--) {
+        final FactoryModel factory = factories[i];
+        final List<ProductModel> remaining =
+            factory.products.where((ProductModel p) => p.id != productId).toList();
+        if (remaining.isEmpty) {
+          factories.removeAt(i);
+        } else {
+          factories[i] = factory.copyWith(products: remaining);
+        }
+      }
+      _replaceActiveCartItems(factories);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _setLoading(false);
+    }
   }
 
   void _setLoading(bool value) {
     _loading = value;
     notifyListeners();
+  }
+
+  List<FactoryModel> _groupBySupplier(List<CartProductEntity> entities) {
+    final Map<String, List<CartProductEntity>> grouped = <String, List<CartProductEntity>>{};
+    for (final CartProductEntity entity in entities) {
+      final String key = entity.supplierNumber;
+      grouped.putIfAbsent(key, () => <CartProductEntity>[]).add(entity);
+    }
+    final List<FactoryModel> factories = <FactoryModel>[];
+    grouped.forEach((String supplierNumber, List<CartProductEntity> products) {
+      final String supplierName = products.isNotEmpty ? products.first.supplierName : '';
+      factories.add(
+        FactoryModel(
+          id: supplierNumber,
+          name: supplierName,
+          products: products.map(_mapEntityToProductModel).toList(),
+        ),
+      );
+    });
+    return factories;
+  }
+
+  ProductModel _mapEntityToProductModel(CartProductEntity entity) {
+    return ProductModel(
+      id: entity.id.toString(),
+      name: entity.name,
+      sku: entity.sku,
+      price: entity.price,
+      imageUrl: entity.imageUrl,
+      quantity: entity.quantity,
+      isSelected: true,
+    );
   }
 
   void _replaceActiveCartItems(List<FactoryModel> items) {

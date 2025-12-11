@@ -79,3 +79,93 @@ class CartInfo {
     );
   }
 }
+
+class CartProductEntity {
+  const CartProductEntity({
+    required this.id,
+    required this.productNumber,
+    required this.supplierNumber,
+    required this.supplierName,
+    required this.name,
+    required this.imageUrl,
+    required this.price,
+    required this.sku,
+    required this.quantity,
+    required this.packageType,
+    this.remark,
+    this.isHot,
+    this.isRecommend,
+    this.isOff,
+    this.prLe,
+    this.prWi,
+    this.prHi,
+    this.ouLe,
+    this.ouWi,
+    this.ouHi,
+    this.inEn,
+    this.ouLo,
+  });
+
+  final int id;
+  final String productNumber;
+  final String supplierNumber;
+  final String supplierName;
+  final String name;
+  final String imageUrl;
+  final double price;
+  final String sku;
+  final int quantity;
+  final String packageType;
+  final String? remark;
+  final bool? isHot;
+  final bool? isRecommend;
+  final bool? isOff;
+  final String? prLe;
+  final String? prWi;
+  final String? prHi;
+  final String? ouLe;
+  final String? ouWi;
+  final String? ouHi;
+  final String? inEn;
+  final String? ouLo;
+
+  factory CartProductEntity.fromJson(Map<String, dynamic> json) {
+    double _toDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is num) return value.toDouble();
+      final String s = value.toString();
+      return double.tryParse(s) ?? 0.0;
+    }
+
+    int _toInt(dynamic value) {
+      if (value == null) return 0;
+      if (value is num) return value.toInt();
+      return int.tryParse(value.toString()) ?? 0;
+    }
+
+    return CartProductEntity(
+      id: _toInt(json['id']),
+      productNumber: (json['productNumber'] ?? '').toString(),
+      supplierNumber: (json['supplierNumber'] ?? '').toString(),
+      supplierName: (json['supplierName'] ?? '').toString(),
+      name: (json['pr_Na'] ?? '').toString(),
+      imageUrl: (json['imgUrl'] ?? '').toString(),
+      price: _toDouble(json['fa_Pr']),
+      sku: (json['fa_No'] ?? '').toString(),
+      quantity: _toInt(json['boxNumber']),
+      packageType: (json['ch_Pa'] ?? '').toString(),
+      remark: json['remark']?.toString(),
+      isHot: json['isHot'] as bool?,
+      isRecommend: json['isRecommend'] as bool?,
+      isOff: json['isOff'] as bool?,
+      prLe: json['pr_Le']?.toString(),
+      prWi: json['pr_Wi']?.toString(),
+      prHi: json['pr_Hi']?.toString(),
+      ouLe: json['ou_Le']?.toString(),
+      ouWi: json['ou_Wi']?.toString(),
+      ouHi: json['ou_Hi']?.toString(),
+      inEn: json['in_En']?.toString(),
+      ouLo: json['ou_Lo']?.toString(),
+    );
+  }
+}
