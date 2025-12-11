@@ -1,15 +1,14 @@
 import '../../../shared/models/exhibition_detail.dart';
 import '../../../shared/models/exhibition_info.dart';
+import '../../../shared/models/paginated_response.dart';
 import '../api_response.dart';
 import '../http_manager.dart';
 
-const _baseUrl = 'http://192.168.110.150:8221';
 
 class ExhibitionService {
   static Future<ApiResponse<List<ExhibitionInfo>>> getOnlineExhibitionList() async {
     return HttpManager().post(
       '/front/OnlineExhibition/GetOnlineExhibitionList',
-      baseUrl: _baseUrl,
       data: {},
       fromJsonT: (data) {
         final List<dynamic> infos = data;
@@ -21,10 +20,19 @@ class ExhibitionService {
   static Future<ApiResponse<ExhibitionDetailInfo>> getOnlineExhibitionDetail(int id) async {
     return HttpManager().post(
       '/front/OnlineExhibition/GetOnlineExhibitionDetail',
-      baseUrl: _baseUrl,
       data: {"id": id},
       fromJsonT: (data) {
         return ExhibitionDetailInfo.fromJson(data);
+      },
+    );
+  }
+
+  static Future<ApiResponse<PaginatedResponse<ExhibitionSupplier>>> queryExhibitionSupplierPage(dynamic data) async {
+    return HttpManager().post(
+      '/front/OnlineExhibition/QueryExhibitionSupplierPage',
+      data: data,
+      fromJsonT: (data) {
+        return PaginatedResponse.fromJson(data, ExhibitionSupplier.fromJson);
       },
     );
   }
